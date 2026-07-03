@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeFinder Premium+</title>
+
+<!-- Bootstrap + Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================
+   SUPER MODERN UI THEME + SMOOTH ANIMATIONS
+   ============================================ */
+:root {
+    --primary: #6a5af9;
+    --secondary: #7b39ed;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #2d3748;
+    --radius: 20px;
+}
+
+[data-theme="dark"] {
+    --bg: #1b1f24;
+    --card: #23272f;
+    --text: #e2e8f0;
+    --primary: #8f78ff;
+    --secondary: #6a5af9;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Poppins", sans-serif;
+    animation: fadeIn 0.7s ease;
+}
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+/* Animated Navbar Gradient */
+.navbar {
+    background: linear-gradient(120deg, #6a5af9, #7b39ed, #ff8dde);
+    background-size: 300% 300%;
+    animation: gradientFlow 6s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.property-card {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: .4s ease;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] .property-card {
+    background: rgba(35,35,35,0.55);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.property-card:hover {
+    transform: translateY(-14px) scale(1.04);
+    box-shadow: 0 25px 45px rgba(0,0,0,0.25);
+}
+/* Skeleton Loader */
+.skeleton-card {
+    height: 320px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, #e0e0e0 0%, #f8f8f8 50%, #e0e0e0 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+
+/* --------------------------------------------
+   NAVBAR
+-------------------------------------------- */
+.navbar {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white !important;
+    text-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+}
+
+.theme-toggle {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* --------------------------------------------
+   SEARCH BAR
+-------------------------------------------- */
+.search-box {
+    background: var(--card);
+    padding: 16px 22px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.07);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.search-box input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background: transparent;
+    color: var(--text);
+}
+
+.search-box i {
+    font-size: 1.4rem;
+    color: var(--primary);
+}
+
+/* --------------------------------------------
+   FILTER SECTION
+-------------------------------------------- */
+.filter-section {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 25px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+}
+
+.form-control, .form-select {
+    border-radius: 12px;
+    padding: 10px 15px;
+    border: 2px solid #e1e5ed;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(90,60,250,0.2);
+}
+
+/* --------------------------------------------
+   PROPERTY CARD
+-------------------------------------------- */
+.property-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: 0.4s ease;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    animation: cardPop 0.4s ease;
+}
+@keyframes cardPop {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.property-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0px 20px 40px rgba(0,0,0,0.2);
+}
+
+.property-img-wrapper {
+    position: relative;
+    height: 230px;
+}
+
+.property-img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: 0.5s ease;
+}
+
+.property-card:hover .property-img {
+    transform: scale(1.12);
+}
+
+/* Heart Button */
+.btn-fav {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-fav i {
+    font-size: 1.2rem;
+    color: #777;
+}
+.btn-fav.active i {
+    color: red;
+    animation: heartbeat 0.4s ease;
+}
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Badges */
+.badge-tag {
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* --------------------------------------------
+   EMPTY STATE
+-------------------------------------------- */
+.empty-state {
+    text-align: center;
+    padding: 70px 20px;
+    animation: fadeIn 0.6s ease;
+}
+.empty-state img {
+    width: 220px;
+    opacity: 0.9;
+}
+.empty-state h3 {
+    margin-top: 20px;
+    font-weight: 600;
+}
+.empty-state p {
+    color: #6c757d;
+}
+</style>
+</head>
+
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg shadow-lg">
+  <div class="container">
+    
+<!-- BRAND WITH MULTICOLOR LOGO & TAGLINE -->
+<a class="navbar-brand d-flex flex-column justify-content-center" href="#" style="line-height: 1;">
+    
+    <span class="d-flex align-items-center brand-title">
+
+        <i class="bi bi-house-fill me-2"></i>
+
+        <span class="logo-colored">
+            <span class="c1">H</span>
+            <span class="c2">o</span>
+            <span class="c3">m</span>
+            <span class="c4">e</span>
+            <span class="c5">F</span>
+            <span class="c6">i</span>
+            <span class="c7">n</span>
+            <span class="c8">d</span>
+            <span class="c9">e</span>
+            <span class="c10">r</span>
+            <span class="c11">+</span>
+        </span>
+    </span>
+
+    <span class="brand-tagline">Your One-Way Ticket to Paradise</span>
+
+</a>
+    <!-- MOBILE SEARCH ICON -->
+    <button class="btn d-lg-none me-2" onclick="scrollToSearch()" 
+            style="color:white;font-size:1.3rem;">
+      <i class="bi bi-search"></i>
+    </button>
+
+    <!-- MOBILE TOGGLER -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- NAV CONTENT -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+
+        <!-- HOME -->
+        <li class="nav-item">
+          <a class="nav-link top-btn" href="home.html">
+            <i class="bi bi-house-door me-1"></i> Home
+          </a>
+        </li>
+
+        <!-- FAVOURITES -->
+        <li class="nav-item">
+          <a class="nav-link top-btn" href="favourites.html">
+            <i class="bi bi-heart-fill me-1"></i> Favourites
+          </a>
+        </li>
+
+        <!-- ADD LISTING BUTTON -->
+        <li class="nav-item">
+          <a href="add.html" class="btn btn-light fw-bold px-3 top-add-btn">
+            <i class="bi bi-plus-circle me-1"></i> Add Listing
+          </a>
+        </li>
+
+        <!-- NOTIFICATIONS -->
+        <li class="nav-item position-relative">
+          <a class="nav-link top-btn" href="notifications.html">
+            <i class="bi bi-bell"></i>
+          </a>
+          <span class="notif-dot"></span>
+        </li>
+
+        <!-- MESSAGES -->
+        <li class="nav-item">
+          <a class="nav-link top-btn" href="messages.html">
+            <i class="bi bi-chat-dots"></i>
+          </a>
+        </li>
+
+        <!-- PROFILE DROPDOWN -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle top-btn" href="#" role="button" 
+             data-bs-toggle="dropdown">
+             <i class="bi bi-person-circle"></i>
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
+            <li><a class="dropdown-item" href="mylistings.html">My Listings</a></li>
+            <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="logout.html">Logout</a></li>
+          </ul>
+        </li>
+
+        <!-- DARK MODE TOGGLE -->
+        <li class="nav-item ms-2">
+          <div class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-brightness-high-fill"></i>
+          </div>
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+</nav>
+<div class="container py-4">
+
+<!-- SEARCH BAR -->
+<div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" id="searchInput" placeholder="Search by city, features, BHK, tags...">
+</div>
+
+<!-- FILTER SECTION -->
+<div class="filter-section mb-4">
+  <div class="row g-3">
+
+    <div class="col-md-3">
+      <label class="form-label">City</label>
+      <select class="form-select" id="filterCity">
+        <option value="">Any</option>
+        <option>Hyderabad</option>
+        <option>Delhi</option>
+        <option>Chennai</option>
+        <option>Mumbai</option>
+        <option>Bangalore</option>
+        <option>Pune</option>
+        <option>Kolkata</option>
+        <option>Ahmedabad</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Property Type</label>
+      <select class="form-select" id="filterType">
+        <option value="">Any</option>
+        <option>Apartment</option>
+        <option>Villa</option>
+        <option>Independent</option>
+        <option>Luxury</option>
+        <option>Studio</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Min Rent</label>
+      <input type="number" class="form-control" id="minRent" placeholder="5000">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Max Rent</label>
+      <input type="number" class="form-control" id="maxRent" placeholder="50000">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">BHK</label>
+      <select class="form-select" id="filterBHK">
+        <option value="">Any</option>
+        <option value="1">1 BHK</option>
+        <option value="2">2 BHK</option>
+        <option value="3">3 BHK</option>
+        <option value="4">4+ BHK</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Facing Direction</label>
+      <select class="form-select" id="filterDirection">
+        <option value="">Any</option>
+        <option>East</option>
+        <option>West</option>
+        <option>North</option>
+        <option>South</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Parking</label>
+      <select class="form-select" id="filterParking">
+        <option value="">Any</option>
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Min Rating</label>
+      <select class="form-select" id="filterRating">
+        <option value="">Any</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="mt-3 d-flex gap-3">
+    <button class="btn btn-primary" onclick="applyFilters()">
+      <i class="bi bi-funnel me-1"></i> Apply Filters
+    </button>
+
+    <button class="btn btn-secondary" onclick="resetFilters()">
+      <i class="bi bi-arrow-clockwise me-1"></i> Reset
+    </button>
+  </div>
+  <!-- SORTING DROPDOWN -->
+<div class="row mt-3">
+  <div class="col-md-3">
+    <label class="form-label">Sort By</label>
+    <select class="form-select" id="sortBy" onchange="applyFilters()">
+      <option value="">Default</option>
+      <option value="priceLow">Price: Low to High</option>
+      <option value="priceHigh">Price: High to Low</option>
+      <option value="ratingHigh">Rating: High to Low</option>
+      <option value="newest">Newest Listings</option>
+      <option value="bhkHigh">BHK: High to Low</option>
+    </select>
+  </div>
+</div>
+</div>
+
+<!-- PROPERTY GRID -->
+<div class="row gy-4" id="propertyGrid"></div>
+
+<!-- EMPTY STATE -->
+<div id="emptyState" class="empty-state d-none">
+  <img src="https://cdn-icons-png.flaticon.com/512/4076/4076500.png">
+  <h3>No Results Found</h3>
+  <p>Try adjusting the filters or searching different keywords.</p>
+</div>
+
+</div>
+
+<!-- HOUSES DATABASE -->
+<script>
+const homesData = [
+  {
+    id: 1,
+    title: "Hyderabad",
+    tag: "New Listing",
+    direction: "East",
+    rating: 4,
+    rent: 12000,
+    bhk: 2,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800"
+  },
+  {
+    id: 2,
+    title: "Delhi",
+    tag: "Featured",
+    direction: "North",
+    rating: 5,
+    rent: 18000,
+    bhk: 3,
+    type: "Villa",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800"
+  },
+  {
+    id: 3,
+    title: "Chennai",
+    tag: "Indian Style",
+    direction: "South",
+    rating: 4,
+    rent: 10500,
+    bhk: 2,
+    type: "Independent",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800"
+  },
+  {
+    id: 4,
+    title: "Mumbai",
+    tag: "Budget Friendly",
+    direction: "West",
+    rating: 4,
+    rent: 15000,
+    bhk: 1,
+    type: "Family Area",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800"
+  },
+  {
+    id: 5,
+    title: "Bangalore",
+    tag: "Premium",
+    direction: "West",
+    rating: 5,
+    rent: 22000,
+    bhk: 3,
+    type: "Luxury",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800"
+  },
+  {
+    id: 6,
+    title: "Pune",
+    tag: "Family Home",
+    direction: "West",
+    rating: 4,
+    rent: 14500,
+    bhk: 2,
+    type: "Spacious",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800"
+  },
+  {
+    id: 7,
+    title: "Kolkata",
+    tag: "Cozy",
+    direction: "East",
+    rating: 3,
+    rent: 9500,
+    bhk: 1,
+    type: "Compact",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800"
+  },
+  {
+    id: 8,
+    title: "Ahmedabad",
+    tag: "Spacious",
+    direction: "North",
+    rating: 5,
+    rent: 16800,
+    bhk: 3,
+    type: "Modern",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600585152915-d208bec867a1?w=800"
+  },
+  {
+    id: 9,
+    title: "Jaipur",
+    tag: "Central",
+    direction: "East",
+    rating: 4,
+    rent: 11000,
+    bhk: 2,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=900"
+},
+{
+    id: 10,
+    title: "Lucknow",
+    tag: "Budget",
+    direction: "North",
+    rating: 3,
+    rent: 9000,
+    bhk: 1,
+    type: "Apartment",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=900"
+},
+{
+    id: 11,
+    title: "Mumbai Sea View",
+    tag: "Sea View",
+    direction: "West",
+    rating: 5,
+    rent: 30000,
+    bhk: 3,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1549187774-b4c8a3b4b8a2?w=900"
+},
+{
+    id: 12,
+    title: "Chennai Penthouse",
+    tag: "Luxury",
+    direction: "South",
+    rating: 5,
+    rent: 42000,
+    bhk: 4,
+    type: "Penthouse",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1501183638710-841dd1904471?w=900"
+},
+{
+    id: 13,
+    title: "Hyderabad IT Hub Studio",
+    tag: "Near IT Park",
+    direction: "East",
+    rating: 4,
+    rent: 8500,
+    bhk: 1,
+    type: "Studio",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1598928506311-c55dedaa99b7?w=900"
+},
+{
+    id: 14,
+    title: "Pune Garden Villa",
+    tag: "Family",
+    direction: "West",
+    rating: 4,
+    rent: 17500,
+    bhk: 3,
+    type: "Villa",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=900"
+},
+{
+    id: 15,
+    title: "Delhi Urban Nest",
+    tag: "Urban",
+    direction: "North",
+    rating: 4,
+    rent: 13500,
+    bhk: 2,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1527030280862-64139fba04ca?w=900"
+},
+{
+    id: 16,
+    title: "Kolkata Riverside",
+    tag: "Riverside",
+    direction: "East",
+    rating: 4,
+    rent: 10800,
+    bhk: 2,
+    type: "Apartment",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1502673530728-f79b4cab31b1?w=900"
+},
+{
+    id: 17,
+    title: "Bangalore Premium Duplex",
+    tag: "Designer",
+    direction: "North",
+    rating: 5,
+    rent: 32000,
+    bhk: 4,
+    type: "Duplex",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=900"
+},
+{
+    id: 18,
+    title: "Ahmedabad Smart Home",
+    tag: "Smart",
+    direction: "South",
+    rating: 4,
+    rent: 16000,
+    bhk: 2,
+    type: "Modern",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=900"
+},
+{
+    id: 19,
+    title: "Mumbai Compact Studio",
+    tag: "Compact",
+    direction: "West",
+    rating: 3,
+    rent: 8000,
+    bhk: 1,
+    type: "Studio",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=900"
+},
+{
+    id: 20,
+    title: "Hyderabad Luxury Villa",
+    tag: "Premium",
+    direction: "North",
+    rating: 5,
+    rent: 28000,
+    bhk: 4,
+    type: "Villa",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=900"
+},
+{
+    id: 21,
+    title: "Chennai Coastal Apartment",
+    tag: "Beach View",
+    direction: "South",
+    rating: 4,
+    rent: 18000,
+    bhk: 2,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=900"
+},
+{
+    id: 22,
+    title: "Pune Smart Loft",
+    tag: "Modern",
+    direction: "East",
+    rating: 4,
+    rent: 13500,
+    bhk: 2,
+    type: "Loft",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1502673530728-f79b4cab31b1?w=900"
+},
+{
+    id: 23,
+    title: "Delhi Premium 3BHK",
+    tag: "Featured",
+    direction: "North",
+    rating: 5,
+    rent: 21000,
+    bhk: 3,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900"
+},
+{
+    id: 24,
+    title: "Kolkata Student Room",
+    tag: "Student",
+    direction: "West",
+    rating: 3,
+    rent: 6500,
+    bhk: 1,
+    type: "Studio",
+    parking: "No",
+    img: "https://images.unsplash.com/photo-1461185750680-1c2af5fb5d96?w=900"
+},
+{
+    id: 25,
+    title: "Bangalore Luxury Condo",
+    tag: "Luxury",
+    direction: "North",
+    rating: 5,
+    rent: 25000,
+    bhk: 3,
+    type: "Luxury",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1515263487990-61b07816b324?w=900"
+},
+{
+    id: 26,
+    title: "Jaipur Heritage House",
+    tag: "Heritage",
+    direction: "East",
+    rating: 4,
+    rent: 15000,
+    bhk: 3,
+    type: "Independent",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1501183638710-841dd1904471?w=900"
+},
+{
+    id: 27,
+    title: "Lucknow Executive Suite",
+    tag: "Executive",
+    direction: "North",
+    rating: 4,
+    rent: 18000,
+    bhk: 2,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?w=900"
+},
+{
+    id: 28,
+    title: "Bangalore Tech Park 1BHK",
+    tag: "IT Hub",
+    direction: "West",
+    rating: 4,
+    rent: 12000,
+    bhk: 1,
+    type: "Apartment",
+    parking: "Yes",
+    img: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=900"
+}
+];
+
+let favouriteHouses = JSON.parse(localStorage.getItem("favourites")) || [];
+window.onload = () => {
+    showSkeleton();
+
+    setTimeout(() => {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+
+        renderCards(homesData);
+        updateFavCounter();
+    }, 800);
+};
+
+
+/* ============================================================
+   CARD RENDERER
+============================================================ */
+function showSkeleton() {
+    const grid = document.getElementById("propertyGrid");
+    grid.innerHTML = "";
+
+    for (let i = 0; i < 8; i++) {
+        let col = document.createElement("div");
+        col.className = "col-md-4 col-lg-3";
+        col.innerHTML = `<div class="skeleton-card"></div>`;
+        grid.appendChild(col);
+    }
+}
+function renderCards(data) {
+    const grid = document.getElementById("propertyGrid");
+    const empty = document.getElementById("emptyState");
+
+    grid.innerHTML = "";
+
+    if (data.length === 0) {
+        empty.classList.remove("d-none");
+        return;
+    } else {
+        empty.classList.add("d-none");
+    }
+
+    data.forEach((home, index) => {
+        const isFav = favouriteHouses.includes(home.id);
+
+        const card = document.createElement("div");
+        card.className = "col-md-4 col-lg-3";
+        card.style.animation = `fadeInCard 0.4s ease ${(index * 0.05)}s both`;
+
+        card.innerHTML = `
+        <div class="property-card">
+            <div class="property-img-wrapper">
+                <img src="${home.img}" class="property-img">
+                
+                <button class="btn-fav ${isFav ? "active" : ""}" onclick="toggleFav(event, ${home.id})">
+                    <i class="bi bi-heart-fill"></i>
+                </button>
+            </div>
+
+            <div class="card-content p-3">
+                <span class="badge-tag">${home.tag}</span>
+                
+                <h5 class="mt-2">${home.title}
+                    <span class="direction-badge ms-2">${home.direction}</span>
+                </h5>
+
+                <div class="stars">${"⭐".repeat(home.rating)}</div>
+
+                <p class="price"><i class="bi bi-currency-rupee"></i>${home.rent}/month</p>
+
+                <p class="details">
+                    <i class="bi bi-house"></i> 
+                    ${home.bhk} BHK • ${home.type} ${home.parking === "Yes" ? "• Parking" : ""}
+                </p>
+
+                <a href="details.html?id=${home.id}" 
+                   class="btn btn-primary w-100 mt-2">View Details</a>
+            </div>
+        </div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+/* ============================================================
+   FAVORITE SYSTEM (localStorage)
+============================================================ */
+function toggleFav(event, id) {
+    event.stopPropagation();
+
+    if (favouriteHouses.includes(id)) {
+        favouriteHouses = favouriteHouses.filter(x => x !== id);
+    } else {
+        favouriteHouses.push(id);
+    }
+
+    localStorage.setItem("favourites", JSON.stringify(favouriteHouses));
+    applyFilters();  // re-render cards
+}
+
+/* ============================================================
+   DARK MODE
+============================================================ */
+function toggleTheme() {
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+}
+
+window.onload = () => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+
+    renderCards(homesData);
+};
+
+/* ============================================================
+   FILTER LOGIC
+============================================================ */
+function applyFilters() {
+    let filtered = homesData;
+
+    const city = document.getElementById("filterCity").value.toLowerCase();
+    const type = document.getElementById("filterType").value.toLowerCase();
+    const minRent = document.getElementById("minRent").value;
+    const maxRent = document.getElementById("maxRent").value;
+    const bhk = document.getElementById("filterBHK").value;
+    const dir = document.getElementById("filterDirection").value.toLowerCase();
+    const parking = document.getElementById("filterParking").value;
+    const rating = document.getElementById("filterRating").value;
+    const search = document.getElementById("searchInput").value.toLowerCase();
+
+    filtered = filtered.filter(home => {
+
+        if (city && !home.title.toLowerCase().includes(city)) return false;
+
+        if (type && home.type.toLowerCase() !== type) return false;
+
+        if (bhk && (bhk == "4" ? home.bhk < 4 : home.bhk != bhk)) return false;
+
+        if (dir && home.direction.toLowerCase() !== dir) return false;
+
+        if (parking && home.parking !== parking) return false;
+
+        if (rating && home.rating < rating) return false;
+
+        if (minRent && home.rent < minRent) return false;
+
+        if (maxRent && home.rent > maxRent) return false;
+
+        if (search) {
+            const haystack = `${home.title} ${home.type} ${home.tag} ${home.direction} ${home.bhk}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+        }
+
+        return true;
+    });
+
+    renderCards(filtered);
+}
+
+/* ============================================================
+   RESET FILTERS
+============================================================ */
+function resetFilters() {
+    document.getElementById("filterCity").value = "";
+    document.getElementById("filterType").value = "";
+    document.getElementById("minRent").value = "";
+    document.getElementById("maxRent").value = "";
+    document.getElementById("filterBHK").value = "";
+    document.getElementById("filterDirection").value = "";
+    document.getElementById("filterParking").value = "";
+    document.getElementById("filterRating").value = "";
+    document.getElementById("searchInput").value = "";
+
+    renderCards(homesData);
+}
+
+/* ============================================================
+   SEARCH LIVE FILTER
+============================================================ */
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+
+/* ============================================================
+   CARD STAGGER ANIMATION
+============================================================ */
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes fadeInCard {
+  from { opacity:0; transform: translateY(10px); }
+  to { opacity:1; transform: translateY(0); }
+}`;
+document.head.appendChild(style);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ADD NEW LISTING FLOATING BUTTON -->
+<a href="add.html" class="add-listing-btn">
+    <i class="bi bi-plus-lg"></i>
+</a>
+
+<style>
+    .logo-colored span {
+    font-weight: 700;
+    font-size: 1.8rem;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+/* Multicolor palette (smooth pastel neon theme) */
+.c1  { color: #ff6b6b; }
+.c2  { color: #ff9f43; }
+.c3  { color: #feca57; }
+.c4  { color: #1dd1a1; }
+.c5  { color: #54a0ff; }
+.c6  { color: #959399; }
+.c7  { color: #ff6bcb; }
+.c8  { color: #48dbfb; }
+.c9  { color: #00cec9; }
+.c10 { color: #a29bfe; }
+.c11 { color: #ff4757; }
+
+/* Adjust the HomeFinder+ title */
+.brand-title {
+    font-weight: 700;
+    color: white; /* icon remains white */
+    gap: 6px;
+}
+
+/* Tagline styling */
+.brand-tagline {
+    font-size: 0.78rem;
+    margin-left: 40px;     /* aligns perfectly under text */
+    margin-top: -2px;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.4px;
+}
+
+    .brand-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: white;
+}
+
+.brand-tagline {
+    font-size: 0.75rem;
+    margin-top: -3px;
+    margin-left: 30px; /* aligns with the text next to icon */
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.3px;
+}
+.add-listing-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    font-size: 1.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    text-decoration: none;
+    z-index: 999;
+    transition: 0.3s ease;
+}
+
+.add-listing-btn:hover {
+    transform: scale(1.12) translateY(-3px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+}
+/* Top bar button styling */
+.top-btn {
+  color: white !important;
+  font-weight: 500;
+  transition: 0.3s ease;
+}
+
+.top-btn:hover {
+  opacity: 0.8;
+  transform: translateY(-2px);
+}
+
+.top-add-btn {
+  border-radius: 12px;
+  background: white !important;
+  color: var(--primary) !important;
+  border: none;
+  transition: 0.3s;
+}
+
+.top-add-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: #f1f1f1 !important;
+}
+
+/* Notification dot */
+.notif-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background: #ff3b3b;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+</style>
+</body>
+</html>

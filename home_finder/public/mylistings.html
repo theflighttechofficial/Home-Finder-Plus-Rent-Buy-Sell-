@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Listings — HomeFinder+</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #6a5af9;
+    --secondary: #b833ff;
+    --card: rgba(255,255,255,0.35);
+    --border: rgba(255,255,255,0.2);
+    --bg: #eef1f7;
+}
+
+[data-theme="dark"] {
+    --bg: #14161a;
+    --card: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.15);
+    color: white;
+}
+
+body {
+    background: var(--bg);
+    font-family: "Poppins", sans-serif;
+    user-select: none;
+}
+
+/* NAVBAR */
+.navbar {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 1rem 2rem;
+    color: white;
+    font-weight: 700;
+    font-size: 1.6rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+/* GLASS CARD STYLE */
+.listing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+    overflow: hidden;
+    transition: .3s;
+}
+
+.listing-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.22);
+}
+
+.listing-img {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.card-body h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.badge-listing {
+    background: linear-gradient(135deg,var(--primary),var(--secondary));
+    color: white;
+    border-radius: 10px;
+    padding: 5px 12px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+/* BUTTONS */
+.btn-edit {
+    background: #6a5af9;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+}
+
+.btn-delete {
+    background: #ff3b3b;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+}
+
+/* EMPTY STATE */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state img {
+    width: 200px;
+    opacity: .8;
+}
+
+.empty-state h3 {
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-folder2-open me-2"></i> My Listings</span>
+
+    <a href="index.html" class="btn btn-light fw-bold px-3">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="container py-4">
+
+    <div id="listingsGrid" class="row g-4"></div>
+
+    <div id="emptyState" class="empty-state d-none">
+        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076500.png">
+        <h3>No Listings Added Yet</h3>
+        <p>Add your first listing from the Add New Listing page.</p>
+    </div>
+
+</div>
+
+<script>
+/* -------------------------------------------------
+   Fetch Listings From LocalStorage
+-------------------------------------------------- */
+function getListings() {
+    return JSON.parse(localStorage.getItem("myListings") || "[]");
+}
+
+/* -------------------------------------------------
+   RENDER CARDS
+-------------------------------------------------- */
+function renderListings() {
+    const grid = document.getElementById("listingsGrid");
+    const empty = document.getElementById("emptyState");
+    const listings = getListings();
+
+    grid.innerHTML = "";
+
+    if (listings.length === 0) {
+        empty.classList.remove("d-none");
+        return;
+    }
+
+    empty.classList.add("d-none");
+
+    listings.forEach((home, idx) => {
+        grid.innerHTML += `
+        <div class="col-md-4">
+            <div class="listing-card">
+                <img src="${home.img}" class="listing-img">
+
+                <div class="card-body p-3">
+                    <span class="badge-listing">${home.tag || "My Listing"}</span>
+
+                    <h4 class="mt-2">${home.title}</h4>
+                    <p class="mb-1"><i class="bi bi-geo-alt"></i> ${home.city}</p>
+                    <p><i class="bi bi-currency-rupee"></i> ${home.rent}/month</p>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn-edit" onclick="editListing(${idx})">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+
+                        <button class="btn-delete" onclick="deleteListing(${idx})">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    });
+}
+
+/* -------------------------------------------------
+   Delete Listing
+-------------------------------------------------- */
+function deleteListing(index) {
+    if (!confirm("Delete this listing?")) return;
+
+    let list = getListings();
+    list.splice(index, 1);
+
+    localStorage.setItem("myListings", JSON.stringify(list));
+    renderListings();
+}
+
+/* -------------------------------------------------
+   Edit Listing
+-------------------------------------------------- */
+function editListing(index) {
+    localStorage.setItem("editListingIndex", index);
+    window.location.href = "add.html"; // Same page used for editing
+}
+
+/* INITIAL LOAD */
+renderListings();
+</script>
+
+</body>
+</html>

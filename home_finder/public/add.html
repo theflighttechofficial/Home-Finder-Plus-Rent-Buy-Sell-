@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Add Home — HomeFinder</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root{
+      --accent1: #667eea;
+      --accent2: #764ba2;
+      --muted: #6b7280;
+      --shadow: 0 8px 30px rgba(20,20,50,0.12);
+    }
+
+    body{
+      margin:0;
+      padding:30px;
+      background:linear-gradient(135deg,#f4f6ff,#ffeefa);
+      font-family:'Inter',sans-serif;
+      overflow-x:hidden;
+    }
+
+    /* PANEL FIX */
+    .panel{
+      max-width:1300px;
+      margin:auto;
+      background:white;
+      padding:26px;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:1.5fr 1fr;
+      gap:40px;
+      overflow:visible;
+    }
+
+    @media(max-width:1500px){
+      .panel{
+        grid-template-columns:1fr 1fr;
+        gap:30px;
+      }
+    }
+
+    @media(max-width:1200px){
+      .panel{
+        grid-template-columns:1fr;
+      }
+      .panel > div:last-child{
+        padding-left:0;
+        border-left:none;
+      }
+    }
+
+    /* LEFT COLUMN WIDTH */
+    .panel > div:first-child{
+      max-width:750px;
+      width:100%;
+    }
+
+    /* MAP COLUMN FIX */
+    .panel > div:last-child{
+      padding-left:20px;
+      border-left:1px solid #eee;
+    }
+
+    /* MATERIAL FLOATING LABEL FIX */
+    .field{position:relative;margin-bottom:20px;}
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      padding:18px 14px 12px 14px;
+      border:1px solid #ddd;
+      border-radius:10px;
+      background:white;
+      font-size:15px;
+      transition:0.2s;
+      box-sizing:border-box;
+    }
+
+    .field textarea{
+      resize:vertical;
+      min-height:100px;
+    }
+
+    /* Extra padding when active */
+    .field input:focus,
+    .field input:not(:placeholder-shown),
+    .field textarea:focus,
+    .field textarea:not(:placeholder-shown),
+    .field select:focus,
+    .field select:not([value=""]){
+      padding-top:26px !important;
+    }
+
+    .label{
+      position:absolute;
+      left:14px;
+      top:16px;
+      font-size:14px;
+      color:#777;
+      background:white;
+      padding:0 6px;
+      pointer-events:none;
+      transition:.2s;
+    }
+
+    .field input:focus + .label,
+    .field input:not(:placeholder-shown) + .label,
+    .field textarea:focus + .label,
+    .field textarea:not(:placeholder-shown) + .label,
+    .field select:focus + .label,
+    .field select:not([value=""]) + .label{
+      top:-10px;
+      font-size:12px;
+      color:var(--accent2);
+    }
+
+    /* AUTOCOMPLETE FIX */
+    #suggestions{
+      position:absolute;
+      width:100%;
+      z-index:9999;
+    }
+    #suggestions div{
+      background:white;
+      padding:10px;
+      border-bottom:1px solid #eee;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    /* MAP */
+    .map{
+      height:350px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid #eee;
+    }
+
+    html,body{
+      overflow-x:hidden;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="panel">
+
+  <!-- LEFT SIDE -->
+  <div>
+    <h1 style="font-size:26px;margin-bottom:10px;color:#333;">Add a Home</h1>
+
+    <form id="homeForm" novalidate>
+
+      <!-- TITLE -->
+      <div class="field">
+        <input id="title" placeholder=" " required/>
+        <label class="label">Home Title *</label>
+      </div>
+
+      <!-- RENT + BEDROOMS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="field">
+          <input id="rent" type="number" placeholder=" " required/>
+          <label class="label">Monthly Rent (₹) *</label>
+        </div>
+
+        <div class="field">
+          <select id="bedrooms" placeholder=" " required>
+            <option value=""></option>
+            <option>1 BHK</option>
+            <option>2 BHK</option>
+            <option>3 BHK</option>
+            <option>4 BHK</option>
+          </select>
+          <label class="label">Bedrooms *</label>
+        </div>
+      </div>
+
+      <!-- BATHROOM + LOCATION -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="field">
+          <input id="bathrooms" type="number" placeholder=" " min="1" required/>
+          <label class="label">Bathrooms *</label>
+        </div>
+
+        <div class="field">
+          <input id="locationInput" placeholder=" " autocomplete="off"/>
+          <label class="label">Location (search or map)</label>
+          <div id="suggestions"></div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="field">
+        <textarea id="description" placeholder=" " maxlength="500"></textarea>
+        <label class="label">Description (max 500)</label>
+        <div style="text-align:right;font-size:12px;color:#777;margin-top:4px;">
+          <span id="descCount">0</span>/500
+        </div>
+      </div>
+
+      <h3>Photos & Media</h3>
+
+      <!-- IMAGE DROPZONE -->
+      <div id="imgDrop" style="border:2px dashed #ccc;border-radius:12px;padding:20px;text-align:center;">
+        Drag images here or
+        <button type="button" id="imgSelectBtn">Select</button>
+        <input type="file" id="imgFiles" accept="image/*" multiple style="display:none;">
+        <div id="thumbs" style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;"></div>
+      </div>
+
+      <br>
+
+      <!-- VIDEO + FLOOR PLAN -->
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div style="flex:1">
+          <label>Video (optional)</label><br>
+          <input id="videoFile" type="file" accept="video/*">
+          <div id="videoPreview" style="display:none;margin-top:10px;">
+            <video width="100%" controls></video>
+          </div>
+        </div>
+
+        <div style="flex:1">
+          <label>Floor Plan (optional)</label><br>
+          <input id="floorFile" type="file">
+          <div id="floorPreview" style="display:none;margin-top:10px;">
+            <div id="floorName"></div>
+          </div>
+        </div>
+      </div>
+
+      <br>
+
+      <h3>Amenities</h3>
+      <div id="amenities" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <label><input type="checkbox" value="WiFi"> WiFi</label>
+        <label><input type="checkbox" value="AC"> AC</label>
+        <label><input type="checkbox" value="Power Backup"> Power Backup</label>
+        <label><input type="checkbox" value="Gym"> Gym</label>
+        <label><input type="checkbox" value="Lift"> Lift</label>
+        <label><input type="checkbox" value="Parking"> Parking</label>
+      </div>
+
+      <br>
+
+      <button type="button" id="saveDraft">Save Draft</button>
+      <button type="button" id="clearDraft">Clear Draft</button>
+
+      <button type="submit" 
+              style="float:right;background:#667eea;color:white;border:none;border-radius:10px;padding:10px 20px;">
+        Submit Listing
+      </button>
+
+    </form>
+  </div>
+
+  <!-- RIGHT SIDE (MAP) -->
+  <div>
+    <h3>Location Map</h3>
+    <div id="map" class="map"></div>
+
+    <p><strong>Selected Address:</strong></p>
+    <div id="addrDisplay">None</div>
+
+    <p><strong>Coordinates:</strong></p>
+    <div id="coordDisplay">Lat: — | Lng: —</div>
+
+    <br>
+
+    <button id="centerMap">Center Map</button>
+    <button id="useCurrent">Use My Location</button>
+  </div>
+
+</div> <!-- END PANEL -->
+
+
+<script>
+/* Map Init */
+let map = L.map('map').setView([13.0827,80.2707],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+setTimeout(()=>map.invalidateSize(),300);
+
+let marker=null;
+function setMarker(lat,lng,text){
+  if(marker) map.removeLayer(marker);
+  marker=L.marker([lat,lng]).addTo(map);
+  document.getElementById("addrDisplay").textContent=text;
+  document.getElementById("coordDisplay").textContent="Lat: "+lat+" | Lng: "+lng;
+}
+
+/* Map click reverse geocode */
+map.on("click", async (e)=>{
+  const lat=e.latlng.lat;
+  const lng=e.latlng.lng;
+  const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+  const d=await r.json();
+  setMarker(lat,lng,d.display_name);
+});
+
+/* Autocomplete */
+const locInput=document.getElementById("locationInput");
+const suggestions=document.getElementById("suggestions");
+
+locInput.addEventListener("input",async ()=>{
+  let q=locInput.value.trim();
+  if(!q){ suggestions.innerHTML=""; return; }
+
+  const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=5`);
+  const data=await r.json();
+
+  suggestions.innerHTML="";
+  data.forEach(item=>{
+    let div=document.createElement("div");
+    div.textContent=item.display_name;
+    div.onclick=()=>{
+      locInput.value=item.display_name;
+      setMarker(item.lat,item.lon,item.display_name);
+      map.setView([item.lat,item.lon],15);
+      suggestions.innerHTML="";
+    };
+    suggestions.appendChild(div);
+  });
+});
+
+/* Description counter */
+const desc=document.getElementById("description");
+document.getElementById("descCount").textContent=desc.value.length;
+desc.oninput=()=> document.getElementById("descCount").textContent=desc.value.length;
+
+/* Image Upload */
+const imgBtn=document.getElementById("imgSelectBtn");
+const imgInput=document.getElementById("imgFiles");
+const thumbs=document.getElementById("thumbs");
+
+imgBtn.onclick=()=>imgInput.click();
+imgInput.onchange=()=>{
+  thumbs.innerHTML="";
+  [...imgInput.files].forEach(file=>{
+    let url=URL.createObjectURL(file);
+    let box=document.createElement("div");
+    box.style.width="120px";
+    box.style.height="90px";
+    box.style.border="1px solid #ccc";
+    box.style.borderRadius="8px";
+    box.style.overflow="hidden";
+    box.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+    thumbs.appendChild(box);
+  });
+};
+
+/* Video preview */
+document.getElementById("videoFile").onchange=(e)=>{
+  let f=e.target.files[0];
+  if(!f)return;
+  let prev=document.getElementById("videoPreview");
+  prev.style.display="block";
+  prev.querySelector("video").src=URL.createObjectURL(f);
+};
+
+/* Floor plan */
+document.getElementById("floorFile").onchange=(e)=>{
+  let f=e.target.files[0];
+  if(!f)return;
+  document.getElementById("floorPreview").style.display="block";
+  document.getElementById("floorName").textContent=f.name;
+};
+
+/* Draft save */
+document.getElementById("saveDraft").onclick=()=>{
+  let d={
+    title:title.value,
+    rent:rent.value,
+    desc:description.value
+  };
+  localStorage.setItem("homeDraft",JSON.stringify(d));
+  alert("Draft saved!");
+};
+
+/* Draft clear */
+document.getElementById("clearDraft").onclick=()=>{
+  localStorage.removeItem("homeDraft");
+  alert("Draft cleared!");
+};
+
+/* Load draft */
+window.onload=()=>{
+  let d=localStorage.getItem("homeDraft");
+  if(d){
+    let j=JSON.parse(d);
+    title.value=j.title||"";
+    rent.value=j.rent||"";
+    description.value=j.desc||"";
+  }
+};
+
+/* Submit */
+document.getElementById("homeForm").onsubmit=(e)=>{
+  e.preventDefault();
+  alert("Listing submitted!");
+};
+</script>
+
+</body>
+</html>

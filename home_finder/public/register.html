@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Register — HomeFinder+</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#6a5af9;
+  --secondary:#b833ff;
+  --bg:#f5f6fd;
+  --card:#ffffff;
+  --text:#2d2d2d;
+}
+
+[data-theme="dark"]{
+  --bg:#1c1e22;
+  --card:#26282c;
+  --text:#f2f2f2;
+}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:"Poppins",sans-serif;
+  padding:20px 0;
+}
+
+.bg-anim{
+  position:fixed;
+  height:400px;
+  width:400px;
+  background:radial-gradient(circle,var(--primary),transparent);
+  filter:blur(90px);
+  animation:move 12s infinite alternate ease;
+  pointer-events:none;
+}
+
+.bg-anim:nth-child(2){
+  left:70%;
+  top:60%;
+  animation-delay:3s;
+  background:radial-gradient(circle,var(--secondary),transparent);
+}
+
+@keyframes move{
+  0%{transform:translate(-100px,-60px);}
+  100%{transform:translate(80px,100px);}
+}
+
+.register-box{
+  width:400px;
+  background:var(--card);
+  padding:35px 30px;
+  border-radius:22px;
+  position:relative;
+  z-index:5;
+  box-shadow:0 10px 35px rgba(0,0,0,0.15);
+  animation:fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.logo{
+  text-align:center;
+  font-size:32px;
+  font-weight:700;
+  color:var(--primary);
+  margin-bottom:10px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:15px;
+  color:#777;
+  margin-bottom:20px;
+}
+
+.form-control{
+  border-radius:12px;
+  padding:12px 15px;
+  border:2px solid #d9d9d9;
+  font-size:15px;
+}
+
+.form-control:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(106,90,249,0.25);
+}
+
+.btn-register{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:white;
+  font-weight:600;
+  margin-top:15px;
+  transition:.3s;
+  cursor:pointer;
+}
+
+.btn-register:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,0.25);
+}
+
+.btn-register:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.error-msg, .success-msg{
+  display:none;
+  margin-top:10px;
+  font-weight:600;
+  padding:10px;
+  border-radius:8px;
+  animation:shake .3s ease;
+}
+
+.error-msg{
+  color:#ff4d4d;
+  background:#ffe6e6;
+}
+
+.success-msg{
+  color:#28a745;
+  background:#d4edda;
+}
+
+@keyframes shake{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-5px);}
+  50%{transform:translateX(5px);}
+  75%{transform:translateX(-5px);}
+  100%{transform:translateX(0);}
+}
+
+.small-link{
+  margin-top:20px;
+  text-align:center;
+  color:var(--primary);
+  font-weight:600;
+  cursor:pointer;
+}
+.small-link:hover{
+  text-decoration:underline;
+}
+
+.theme-switch{
+  position:fixed;
+  top:20px;
+  right:20px;
+  font-size:25px;
+  cursor:pointer;
+  color:var(--primary);
+  z-index:100;
+}
+
+.spinner{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border:2px solid #fff;
+  border-top-color:transparent;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+.password-strength{
+  margin-top:5px;
+  font-size:12px;
+  display:none;
+}
+
+.strength-bar{
+  height:4px;
+  border-radius:2px;
+  margin-top:5px;
+  transition:all .3s;
+}
+
+.weak{background:#ff4d4d; width:33%;}
+.medium{background:#ffa500; width:66%;}
+.strong{background:#28a745; width:100%;}
+</style>
+</head>
+
+<body>
+
+<div class="bg-anim"></div>
+<div class="bg-anim"></div>
+
+<div class="theme-switch" onclick="toggleTheme()">
+  <i class="bi bi-moon-fill"></i>
+</div>
+
+<div class="register-box">
+  
+  <div class="logo">HomeFinder+</div>
+  <div class="subtitle">Create your account</div>
+
+  <input type="text" id="name" class="form-control mb-3" placeholder="Full Name">
+
+  <input type="email" id="email" class="form-control mb-3" placeholder="Email address">
+
+  <input type="password" id="password" class="form-control" placeholder="Password">
+  
+  <div id="passwordStrength" class="password-strength">
+    <div id="strengthText"></div>
+    <div id="strengthBar" class="strength-bar"></div>
+  </div>
+
+  <input type="password" id="confirmPassword" class="form-control mt-3" placeholder="Confirm Password">
+
+  <div id="errorMsg" class="error-msg"></div>
+  <div id="successMsg" class="success-msg"></div>
+
+  <button class="btn-register" id="registerBtn" onclick="registerUser()">Create Account</button>
+
+  <div class="small-link" onclick="goLogin()">Already have an account? Login</div>
+</div>
+
+<script>
+/* DARK MODE */
+function toggleTheme(){
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    const icon = document.querySelector(".theme-switch i");
+    icon.className = next === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+}
+
+window.onload = () => {
+  const saved = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", saved);
+  const icon = document.querySelector(".theme-switch i");
+  icon.className = saved === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+};
+
+/* PASSWORD STRENGTH CHECKER */
+document.getElementById("password").addEventListener("input", (e) => {
+  const pwd = e.target.value;
+  const strengthDiv = document.getElementById("passwordStrength");
+  const strengthBar = document.getElementById("strengthBar");
+  const strengthText = document.getElementById("strengthText");
+
+  if(pwd.length === 0){
+      strengthDiv.style.display = "none";
+      return;
+  }
+
+  strengthDiv.style.display = "block";
+
+  let strength = 0;
+  if(pwd.length >= 8) strength++;
+  if(/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++;
+  if(/\d/.test(pwd)) strength++;
+  if(/[^a-zA-Z0-9]/.test(pwd)) strength++;
+
+  strengthBar.className = "strength-bar";
+  
+  if(strength <= 2){
+      strengthBar.classList.add("weak");
+      strengthText.textContent = "Weak password";
+      strengthText.style.color = "#ff4d4d";
+  } else if(strength === 3){
+      strengthBar.classList.add("medium");
+      strengthText.textContent = "Medium password";
+      strengthText.style.color = "#ffa500";
+  } else {
+      strengthBar.classList.add("strong");
+      strengthText.textContent = "Strong password";
+      strengthText.style.color = "#28a745";
+  }
+});
+
+/* REGISTER SYSTEM - CONNECTED TO BACKEND */
+async function registerUser(){
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const btn = document.getElementById("registerBtn");
+
+  hideMessages();
+
+  // Validation
+  if(name === "" || email === "" || password === "" || confirmPassword === ""){
+      showError("Please fill in all fields");
+      return;
+  }
+
+  if(name.length < 2){
+      showError("Name must be at least 2 characters");
+      return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){
+      showError("Please enter a valid email address");
+      return;
+  }
+
+  if(password.length < 6){
+      showError("Password must be at least 6 characters");
+      return;
+  }
+
+  if(password !== confirmPassword){
+      showError("Passwords do not match");
+      return;
+  }
+
+  // Disable button and show loading
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+  try {
+      const response = await fetch("/register", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await response.json();
+
+      if(data.success){
+          showSuccess(data.message);
+          
+          // Clear form
+          document.getElementById("name").value = "";
+          document.getElementById("email").value = "";
+          document.getElementById("password").value = "";
+          document.getElementById("confirmPassword").value = "";
+          document.getElementById("passwordStrength").style.display = "none";
+          
+          setTimeout(() => {
+              window.location.href = "login.html";
+          }, 1500);
+      } else {
+          showError(data.message);
+          btn.disabled = false;
+          btn.innerHTML = "Create Account";
+      }
+
+  } catch(err) {
+      console.error("Registration error:", err);
+      showError("Unable to connect to server. Please try again.");
+      btn.disabled = false;
+      btn.innerHTML = "Create Account";
+  }
+}
+
+function showError(msg){
+  const box = document.getElementById("errorMsg");
+  box.innerText = msg;
+  box.style.display = "block";
+}
+
+function showSuccess(msg){
+  const box = document.getElementById("successMsg");
+  box.innerText = msg;
+  box.style.display = "block";
+}
+
+function hideMessages(){
+  document.getElementById("errorMsg").style.display = "none";
+  document.getElementById("successMsg").style.display = "none";
+}
+
+function goLogin(){
+  window.location.href = "login.html";
+}
+
+// Allow Enter key to submit
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("confirmPassword").addEventListener("keypress", (e) => {
+      if(e.key === "Enter") registerUser();
+  });
+});
+</script>
+
+</body>
+</html>

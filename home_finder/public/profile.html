@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — HomeFinder+</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #6a5af9;
+    --secondary: #b833ff;
+    --bg-light: #eef1f7;
+    --glass-bg: rgba(255,255,255,0.35);
+    --glass-border: rgba(255,255,255,0.25);
+}
+
+body[data-theme="dark"] {
+    --bg-light: #14161a;
+    --glass-bg: rgba(255,255,255,0.08);
+    --glass-border: rgba(255,255,255,0.12);
+    color: white;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: var(--bg-light);
+    backdrop-filter: blur(10px);
+}
+
+/* ---------------- HEADER ---------------- */
+.profile-header {
+    width: 100%;
+    height: 230px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 0 0 35px 35px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+}
+
+.header-wave {
+    position: absolute;
+    bottom: -20px;
+    width: 120%;
+    height: 120px;
+    left: -10%;
+    background: rgba(255,255,255,0.15);
+    filter: blur(30px);
+    transform: rotate(5deg);
+}
+
+/* ---------------- AVATAR ---------------- */
+.avatar-container {
+    position: relative;
+    margin-top: -70px;
+    display: flex;
+    justify-content: center;
+}
+
+.avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 6px solid white;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+}
+
+.avatar-glow {
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    top: -15px;
+    filter: blur(35px);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    z-index: -1;
+    opacity: 0.6;
+}
+
+/* ---------------- GLASS CARD ---------------- */
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(22px);
+    padding: 28px;
+    border-radius: 22px;
+    box-shadow: 0 8px 35px rgba(0,0,0,0.12);
+    margin-bottom: 25px;
+    animation: fadeInUp .6s ease;
+}
+
+@keyframes fadeInUp {
+    0% {opacity:0; transform: translateY(15px);}
+    100% {opacity:1; transform:translateY(0);}
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--primary);
+    padding-left: 10px;
+}
+
+/* Inputs */
+.form-control {
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.55);
+    font-size: 0.95rem;
+    padding: 10px 14px;
+}
+
+body[data-theme="dark"] .form-control {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* Buttons */
+.save-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    color: white;
+    font-weight: 600;
+    width: 100%;
+    transition: 0.2s;
+}
+.save-btn:hover {
+    transform: scale(1.03);
+}
+
+/* Danger button */
+.delete-btn {
+    width: 100%;
+    background: #ff3b3b;
+    border: none;
+    padding: 12px 18px;
+    color: white;
+    border-radius: 14px;
+    margin-top: 10px;
+}
+
+/* Back button */
+.back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 99;
+}
+</style>
+</head>
+
+<body>
+
+<a href="index.html" class="btn btn-dark back-btn">
+    <i class="bi bi-arrow-left"></i> Back
+</a>
+
+<!-- Header -->
+<div class="profile-header">
+    <div class="header-wave"></div>
+</div>
+
+<!-- Avatar -->
+<div class="avatar-container">
+    <div class="avatar-glow"></div>
+    <img id="avatarPreview" class="avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+    <input type="file" id="avatarUpload" accept="image/*" style="display:none">
+</div>
+
+<!-- Profile Content -->
+<div class="container" style="max-width:900px; margin-top:30px;">
+
+    <h2 class="text-center" id="profileName"></h2>
+
+    <!-- Personal Information -->
+    <div class="glass-card">
+        <div class="section-title">Personal Information</div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label>Name</label>
+                <input id="inputName" type="text" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input id="inputEmail" type="email" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>Phone</label>
+                <input id="inputPhone" type="text" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label>City</label>
+                <input id="inputCity" type="text" class="form-control">
+            </div>
+        </div>
+
+        <button class="save-btn mt-3" onclick="saveProfile()">Save Changes</button>
+    </div>
+
+    <!-- Preferences -->
+    <div class="glass-card">
+        <div class="section-title">Preferences</div>
+
+        <input type="text" class="form-control mb-2" id="prefTheme" disabled>
+        <input type="text" class="form-control" id="prefCardSize" disabled>
+    </div>
+
+    <!-- Password -->
+    <div class="glass-card">
+        <div class="section-title">Change Password</div>
+        <input class="form-control mb-2" id="oldPass" type="password" placeholder="Old Password">
+        <input class="form-control" id="newPass" type="password" placeholder="New Password">
+        <button class="save-btn mt-3" onclick="changePassword()">Update Password</button>
+    </div>
+
+    <!-- Delete -->
+    <div class="glass-card">
+        <div class="section-title text-danger">Danger Zone</div>
+        <button class="delete-btn" onclick="deleteAccount()">Delete Account</button>
+    </div>
+
+</div>
+
+<script>
+/* ---------------- LOAD PROFILE ---------------- */
+function loadProfile() {
+    const data = JSON.parse(localStorage.getItem("userProfile")) || {
+        name: "Guest User",
+        email: "",
+        phone: "",
+        city: "",
+        avatar: ""
+    };
+
+    document.getElementById("profileName").innerText = data.name;
+    document.getElementById("inputName").value = data.name;
+    document.getElementById("inputEmail").value = data.email;
+    document.getElementById("inputPhone").value = data.phone;
+    document.getElementById("inputCity").value = data.city;
+
+    if (data.avatar) {
+        document.getElementById("avatarPreview").src = data.avatar;
+    }
+
+    document.getElementById("prefTheme").value = "Theme: " + (localStorage.getItem("theme") || "Light");
+    document.getElementById("prefCardSize").value = "Card Size: Normal";
+}
+
+/* ---------------- SAVE PROFILE ---------------- */
+function saveProfile() {
+    const data = {
+        name: inputName.value,
+        email: inputEmail.value,
+        phone: inputPhone.value,
+        city: inputCity.value,
+        avatar: avatarPreview.src
+    };
+    localStorage.setItem("userProfile", JSON.stringify(data));
+    alert("Profile Updated");
+    loadProfile();
+}
+
+/* ---------------- AVATAR UPLOAD ---------------- */
+avatarPreview.onclick = () => avatarUpload.click();
+avatarUpload.onchange = () => {
+    const reader = new FileReader();
+    reader.onload = e => avatarPreview.src = e.target.result;
+    reader.readAsDataURL(avatarUpload.files[0]);
+};
+
+/* ---------------- CHANGE PASSWORD ---------------- */
+function changePassword() {
+    if (!oldPass.value || !newPass.value) {
+        alert("Enter both fields!");
+        return;
+    }
+    alert("Password updated! (Demo)");
+}
+
+/* ---------------- DELETE ACCOUNT ---------------- */
+function deleteAccount() {
+    if (confirm("Delete your account? All data will be erased.")) {
+        localStorage.clear();
+        alert("Deleted!");
+        location.href = "index.html";
+    }
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>

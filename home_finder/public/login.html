@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login — HomeFinder+</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#6a5af9;
+  --secondary:#b833ff;
+  --bg:#f5f6fd;
+  --card:#ffffff;
+  --text:#2d2d2d;
+}
+
+[data-theme="dark"]{
+  --bg:#1c1e22;
+  --card:#26282c;
+  --text:#f2f2f2;
+}
+
+body{
+  background:var(--bg);
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:"Poppins",sans-serif;
+  overflow:hidden;
+}
+
+.bg-anim{
+  position:absolute;
+  height:400px;
+  width:400px;
+  background:radial-gradient(circle,var(--primary),transparent);
+  filter:blur(90px);
+  animation:move 12s infinite alternate ease;
+}
+
+.bg-anim:nth-child(2){
+  left:70%;
+  top:60%;
+  animation-delay:3s;
+  background:radial-gradient(circle,var(--secondary),transparent);
+}
+
+@keyframes move{
+  0%{transform:translate(-100px,-60px);}
+  100%{transform:translate(80px,100px);}
+}
+
+.login-box{
+  width:370px;
+  background:var(--card);
+  padding:35px 30px;
+  border-radius:22px;
+  position:relative;
+  z-index:5;
+  box-shadow:0 10px 35px rgba(0,0,0,0.15);
+  animation:fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.logo{
+  text-align:center;
+  font-size:32px;
+  font-weight:700;
+  color:var(--primary);
+  margin-bottom:10px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:15px;
+  color:#777;
+  margin-bottom:20px;
+}
+
+.form-control{
+  border-radius:12px;
+  padding:12px 15px;
+  border:2px solid #d9d9d9;
+  font-size:15px;
+}
+
+.form-control:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(106,90,249,0.25);
+}
+
+.btn-login{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:white;
+  font-weight:600;
+  margin-top:15px;
+  transition:.3s;
+  cursor:pointer;
+}
+
+.btn-login:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,0.25);
+}
+
+.btn-login:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.error-msg, .success-msg{
+  display:none;
+  margin-top:10px;
+  font-weight:600;
+  padding:10px;
+  border-radius:8px;
+  animation:shake .3s ease;
+}
+
+.error-msg{
+  color:#ff4d4d;
+  background:#ffe6e6;
+}
+
+.success-msg{
+  color:#28a745;
+  background:#d4edda;
+}
+
+@keyframes shake{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-5px);}
+  50%{transform:translateX(5px);}
+  75%{transform:translateX(-5px);}
+  100%{transform:translateX(0);}
+}
+
+.social-login{
+  margin-top:20px;
+  display:flex;
+  gap:12px;
+}
+
+.social-btn{
+  width:50%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  font-weight:500;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.social-btn:hover{
+  background:#f1f1f1;
+}
+
+.small-link{
+  margin-top:20px;
+  text-align:center;
+  color:var(--primary);
+  font-weight:600;
+  cursor:pointer;
+}
+.small-link:hover{
+  text-decoration:underline;
+}
+
+.theme-switch{
+  position:absolute;
+  top:20px;
+  right:20px;
+  font-size:25px;
+  cursor:pointer;
+  color:var(--primary);
+}
+
+.spinner{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border:2px solid #fff;
+  border-top-color:transparent;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-anim"></div>
+<div class="bg-anim"></div>
+
+<div class="theme-switch" onclick="toggleTheme()">
+  <i class="bi bi-moon-fill"></i>
+</div>
+
+<div class="login-box">
+  
+  <div class="logo">HomeFinder+</div>
+  <div class="subtitle">Sign in to continue</div>
+
+  <input type="email" id="email" class="form-control mb-3" placeholder="Email address">
+
+  <input type="password" id="password" class="form-control" placeholder="Password">
+
+  <div id="errorMsg" class="error-msg"></div>
+  <div id="successMsg" class="success-msg"></div>
+
+  <button class="btn-login" id="loginBtn" onclick="loginUser()">Login</button>
+
+  <div class="social-login">
+    <div class="social-btn">
+      <i class="bi bi-google"></i> Google
+    </div>
+    <div class="social-btn">
+      <i class="bi bi-facebook"></i> Facebook
+    </div>
+  </div>
+
+  <div class="small-link" onclick="goRegister()">Create an account</div>
+</div>
+
+<script>
+/* DARK MODE */
+function toggleTheme(){
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    const icon = document.querySelector(".theme-switch i");
+    icon.className = next === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+}
+
+window.onload = () => {
+  const saved = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", saved);
+  const icon = document.querySelector(".theme-switch i");
+  icon.className = saved === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+};
+
+/* LOGIN SYSTEM - CONNECTED TO BACKEND */
+async function loginUser(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const btn = document.getElementById("loginBtn");
+
+  hideMessages();
+
+  if(email === "" || password === ""){
+      showError("Please enter email and password");
+      return;
+  }
+
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){
+      showError("Please enter a valid email address");
+      return;
+  }
+
+  // Disable button and show loading
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Logging in...';
+
+  try {
+      const response = await fetch("/login", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if(data.success){
+          showSuccess(data.message);
+          localStorage.setItem("loggedInUser", email);
+          
+          setTimeout(() => {
+              window.location.href = "index.html";
+          }, 1000);
+      } else {
+          showError(data.message);
+          btn.disabled = false;
+          btn.innerHTML = "Login";
+      }
+
+  } catch(err) {
+      console.error("Login error:", err);
+      showError("Unable to connect to server. Please try again.");
+      btn.disabled = false;
+      btn.innerHTML = "Login";
+  }
+}
+
+function showError(msg){
+  const box = document.getElementById("errorMsg");
+  box.innerText = msg;
+  box.style.display = "block";
+}
+
+function showSuccess(msg){
+  const box = document.getElementById("successMsg");
+  box.innerText = msg;
+  box.style.display = "block";
+}
+
+function hideMessages(){
+  document.getElementById("errorMsg").style.display = "none";
+  document.getElementById("successMsg").style.display = "none";
+}
+
+function goRegister(){
+  window.location.href = "register.html";
+}
+
+// Allow Enter key to submit
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("password").addEventListener("keypress", (e) => {
+      if(e.key === "Enter") loginUser();
+  });
+  document.getElementById("email").addEventListener("keypress", (e) => {
+      if(e.key === "Enter") loginUser();
+  });
+});
+</script>
+
+</body>
+</html>
