@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings — HomeFinder+</title>
+    <meta name="description" content="Appearance and preferences.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+<main class="page">
+    <div class="container container-sm">
+        <div class="page-head"><div><h1>Settings</h1><p>Make HomeFinder+ look and feel the way you like. Saved on this device.</p></div></div>
+        <div class="stack">
+            <section class="card card-pad">
+                <div class="card-head"><h3>Theme</h3></div>
+                <div class="theme-options" id="theme-options">
+                    <label class="theme-option"><input type="radio" name="theme" value="light"><span class="preview light"><i></i></span><span class="name">Light</span></label>
+                    <label class="theme-option"><input type="radio" name="theme" value="dark"><span class="preview dark"><i></i></span><span class="name">Dark</span></label>
+                    <label class="theme-option"><input type="radio" name="theme" value="auto"><span class="preview auto"><i></i></span><span class="name">System</span></label>
+                </div>
+            </section>
+            <section class="card card-pad">
+                <div class="card-head"><h3>Display</h3></div>
+                <div class="setting-row">
+                    <div><strong>Card size</strong><span>How tall listing photos are in grids.</span></div>
+                    <select class="select" id="density" style="width:auto">
+                        <option value="compact">Compact</option>
+                        <option value="normal">Comfortable</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <div><strong>Reduce motion</strong><span>Turn off animations and transitions.</span></div>
+                    <label class="switch"><input type="checkbox" id="motion"><span></span></label>
+                </div>
+            </section>
+            <section class="card card-pad">
+                <div class="card-head"><h3>Data on this device</h3></div>
+                <div class="setting-row">
+                    <div><strong>Compare list</strong><span>Homes you've added to compare.</span></div>
+                    <button class="btn btn-sm" id="clear-compare">Clear</button>
+                </div>
+                <div class="setting-row">
+                    <div><strong>Listing draft</strong><span>Unsaved listing you started.</span></div>
+                    <button class="btn btn-sm" id="clear-draft">Clear</button>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+<footer id="site-footer"></footer>
+<script type="module" src="/js/pages/settings.js"></script>
+</body>
+</html>

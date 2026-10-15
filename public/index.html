@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HomeFinder+ — Rent, buy & sell homes across India</title>
+    <meta name="description" content="Discover homes for rent and sale across India, save favourites, compare and message owners directly.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<main>
+    <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <span class="hero-eyebrow"><span class="badge badge-brand"><i data-icon="sparkles"></i> New</span> Message owners directly — no brokers in between</span>
+            <h1>Find a place that feels like <span class="grad">home</span>.</h1>
+            <p class="lead">Browse verified homes to rent or buy across India's biggest cities — or list your own property in minutes.</p>
+
+            <form class="search-panel" id="hero-search" role="search">
+                <div class="segmented" role="group" aria-label="Looking to">
+                    <input type="radio" name="purpose" id="p-rent" value="rent" checked><label for="p-rent"><i data-icon="key"></i> Rent</label>
+                    <input type="radio" name="purpose" id="p-sale" value="sale"><label for="p-sale"><i data-icon="home"></i> Buy</label>
+                </div>
+                <div class="search-row">
+                    <div class="input-group">
+                        <i data-icon="search"></i>
+                        <input class="input" name="q" placeholder="Search locality, amenity or “3 BHK”" aria-label="Search">
+                    </div>
+                    <select class="select" name="city" aria-label="City"><option value="">All cities</option></select>
+                    <select class="select" name="type" aria-label="Property type"><option value="">Any type</option></select>
+                    <button class="btn btn-gradient" type="submit"><i data-icon="search"></i> Search</button>
+                </div>
+            </form>
+
+            <div class="hero-stats" id="hero-stats">
+                <div><strong data-stat="total">—</strong><span>Active listings</span></div>
+                <div><strong data-stat="cities">—</strong><span>Cities</span></div>
+                <div><strong>0%</strong><span>Brokerage</span></div>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <img class="a" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=700&q=80&auto=format&fit=crop" alt="">
+            <img class="b" src="https://images.unsplash.com/photo-1502672260066-6bc2c3376d88?w=500&q=80&auto=format&fit=crop" alt="">
+            <div class="float f1"><span class="ico"><i data-icon="shield"></i></span><span>Verified owner<small>Responds in ~1 hr</small></span></div>
+            <div class="float f2"><span class="ico"><i data-icon="heart"></i></span><span>Saved by 24 people<small>this week</small></span></div>
+          </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <div><span class="eyebrow">Popular cities</span><h2>Explore by city</h2></div>
+            </div>
+            <div class="city-grid" id="cities"></div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <div><span class="eyebrow">Top rated</span><h2>Homes for rent</h2><p>Hand-picked rentals with the best ratings.</p></div>
+                <a class="btn" href="/search.html?purpose=rent&sort=rating">View all <i data-icon="arrowRight"></i></a>
+            </div>
+            <div class="grid" id="featured-rent"></div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <div><span class="eyebrow">Fresh on the market</span><h2>Homes for sale</h2><p>Own your next home — new listings every week.</p></div>
+                <a class="btn" href="/search.html?purpose=sale">View all <i data-icon="arrowRight"></i></a>
+            </div>
+            <div class="grid" id="featured-sale"></div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-head"><div><span class="eyebrow">Why HomeFinder+</span><h2>Everything you need, nothing you don't</h2></div></div>
+            <div class="feature-grid">
+                <div class="card feature"><div class="ico"><i data-icon="search"></i></div><h3>Smart search</h3><p>Filter by budget, BHK, furnishing, facing, amenities and more — results update instantly.</p></div>
+                <div class="card feature"><div class="ico"><i data-icon="chat"></i></div><h3>Talk to owners</h3><p>Message owners in-app. No middlemen, no spam calls, no brokerage.</p></div>
+                <div class="card feature"><div class="ico"><i data-icon="columns"></i></div><h3>Compare side by side</h3><p>Shortlist up to four homes and compare price, size and amenities at a glance.</p></div>
+                <div class="card feature"><div class="ico"><i data-icon="shield"></i></div><h3>Verified listings</h3><p>Verified owners are clearly marked so you can search with confidence.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="cta">
+                <div><h2>Have a property to rent or sell?</h2><p>List it for free and reach thousands of genuine buyers and tenants.</p></div>
+                <a class="btn btn-lg" href="/add.html"><i data-icon="plus"></i> List your property</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer id="site-footer"></footer>
+<script type="module" src="/js/pages/index.js"></script>
+</body>
+</html>

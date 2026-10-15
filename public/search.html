@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search homes — HomeFinder+</title>
+    <meta name="description" content="Search homes for rent and sale with powerful filters.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<main class="page">
+    <div class="container">
+        <div class="page-head">
+            <div>
+                <h1 id="page-title">Explore homes</h1>
+                <p id="page-sub">Find the right place with filters that actually help.</p>
+            </div>
+            <div class="segmented" role="group" aria-label="Purpose" id="purpose-toggle">
+                <button type="button" data-purpose="" aria-pressed="true">All</button>
+                <button type="button" data-purpose="rent" aria-pressed="false">Rent</button>
+                <button type="button" data-purpose="sale" aria-pressed="false">Buy</button>
+            </div>
+        </div>
+
+        <div class="browse">
+            <aside class="card filters" id="filters" aria-label="Filters">
+                <h3>Filters <span class="row"><button class="btn btn-ghost btn-sm" type="button" id="reset"><i data-icon="refresh"></i> Reset</button><button class="btn btn-ghost btn-icon btn-sm filters-close" type="button" data-action="close-overlays" aria-label="Close filters"><i data-icon="x"></i></button></span></h3>
+                <form id="filter-form">
+                    <div class="field">
+                        <label for="f-city">City</label>
+                        <select class="select" id="f-city" name="city"><option value="">All cities</option></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-type">Property type</label>
+                        <select class="select" id="f-type" name="type"><option value="">Any type</option></select>
+                    </div>
+                    <div class="field">
+                        <span class="label">Budget (₹)</span>
+                        <div class="range">
+                            <input class="input" name="minPrice" type="number" min="0" step="1000" placeholder="Min" aria-label="Minimum price">
+                            <input class="input" name="maxPrice" type="number" min="0" step="1000" placeholder="Max" aria-label="Maximum price">
+                        </div>
+                        <span class="hint" id="budget-hint"></span>
+                    </div>
+                    <div class="field">
+                        <span class="label">Bedrooms</span>
+                        <div class="chips" data-chip-group="bedrooms">
+                            <button type="button" class="chip" data-value="">Any</button>
+                            <button type="button" class="chip" data-value="1">1+</button>
+                            <button type="button" class="chip" data-value="2">2+</button>
+                            <button type="button" class="chip" data-value="3">3+</button>
+                            <button type="button" class="chip" data-value="4">4+</button>
+                        </div>
+                        <input type="hidden" name="bedrooms">
+                    </div>
+                    <div class="field">
+                        <label for="f-furnishing">Furnishing</label>
+                        <select class="select" id="f-furnishing" name="furnishing"><option value="">Any</option></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-facing">Facing</label>
+                        <select class="select" id="f-facing" name="facing"><option value="">Any direction</option></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-rating">Minimum rating</label>
+                        <select class="select" id="f-rating" name="minRating">
+                            <option value="">Any rating</option>
+                            <option value="4.5">4.5+ ★</option>
+                            <option value="4">4.0+ ★</option>
+                            <option value="3">3.0+ ★</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label class="check"><input type="checkbox" name="parking" value="true"> Parking available</label>
+                    </div>
+                    <div class="field">
+                        <span class="label">Amenities</span>
+                        <div class="chips" id="amenity-chips"></div>
+                        <input type="hidden" name="amenities">
+                    </div>
+                </form>
+                <button class="btn btn-primary btn-block mt-3 filters-toggle" type="button" data-action="close-overlays">Show results</button>
+            </aside>
+
+            <section>
+                <div class="toolbar">
+                    <button class="btn filters-toggle" type="button" id="open-filters"><i data-icon="filter"></i> Filters</button>
+                    <div class="input-group spacer">
+                        <i data-icon="search"></i>
+                        <input class="input" id="q" type="search" placeholder="Search by title, locality, amenity, “2 BHK”…" aria-label="Search">
+                    </div>
+                    <select class="select" id="sort" aria-label="Sort by" style="width:auto">
+                        <option value="newest">Newest first</option>
+                        <option value="price_asc">Price: low to high</option>
+                        <option value="price_desc">Price: high to low</option>
+                        <option value="rating">Top rated</option>
+                        <option value="popular">Most viewed</option>
+                        <option value="bedrooms">Most bedrooms</option>
+                    </select>
+                </div>
+                <div class="toolbar"><span class="count" id="count" aria-live="polite"></span></div>
+                <div class="active-filters" id="active-filters"></div>
+                <div class="grid" id="results"></div>
+                <nav class="pagination" id="pagination" aria-label="Pagination"></nav>
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer id="site-footer"></footer>
+<script type="module" src="/js/pages/search.js"></script>
+</body>
+</html>

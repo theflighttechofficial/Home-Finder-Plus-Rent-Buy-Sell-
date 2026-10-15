@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My profile — HomeFinder+</title>
+    <meta name="description" content="Manage your HomeFinder+ profile.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+<main class="page">
+    <div class="container container-md">
+        <div class="page-head"><div><h1>My profile</h1><p>How you appear to owners and buyers.</p></div></div>
+        <div class="profile-layout">
+            <aside class="card profile-card">
+                <div class="avatar-wrap">
+                    <span id="avatar"></span>
+                    <label for="avatar-input" title="Change photo" aria-label="Change profile photo"><i data-icon="camera"></i></label>
+                    <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+                </div>
+                <h2 id="p-name" class="mb-0" style="font-size:1.3rem"></h2>
+                <div class="muted small" id="p-email"></div>
+                <div class="muted small mt-1" id="p-since"></div>
+                <div class="stat-row" id="p-stats"></div>
+            </aside>
+
+            <div class="stack">
+                <form class="card card-pad" id="profile-form" novalidate>
+                    <div class="card-head"><h3>Personal details</h3></div>
+                    <div class="form-grid">
+                        <div class="field"><label for="name">Full name</label><input class="input" id="name" name="name" maxlength="80" required autocomplete="name"></div>
+                        <div class="field"><label for="email">Email</label><input class="input" id="email" disabled></div>
+                        <div class="field"><label for="phone">Phone</label><input class="input" id="phone" name="phone" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="+91 98765 43210"></div>
+                        <div class="field"><label for="city">City</label><input class="input" id="city" name="city" maxlength="60" autocomplete="address-level2"></div>
+                        <div class="field span-2"><label for="bio">About you</label><textarea class="textarea" id="bio" name="bio" maxlength="400" rows="3" placeholder="A line or two about what you're looking for or offering."></textarea></div>
+                    </div>
+                    <div class="row mt-2" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save changes</button></div>
+                </form>
+
+                <form class="card card-pad" id="password-form" novalidate>
+                    <div class="card-head"><h3>Change password</h3></div>
+                    <div class="form-grid">
+                        <div class="field"><label for="currentPassword">Current password</label><input class="input" type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required></div>
+                        <div class="field"><label for="newPassword">New password</label><input class="input" type="password" id="newPassword" name="newPassword" autocomplete="new-password" minlength="8" required><span class="hint">At least 8 characters.</span></div>
+                    </div>
+                    <div class="row mt-2" style="justify-content:flex-end"><button class="btn" type="submit"><i data-icon="lock"></i> Update password</button></div>
+                </form>
+
+                <div class="card card-pad">
+                    <div class="card-head"><h3 style="color:var(--danger)">Danger zone</h3></div>
+                    <div class="setting-row">
+                        <div><strong>Delete account</strong><span>Permanently delete your account, listings and notifications.</span></div>
+                        <button class="btn btn-danger-soft" id="delete-account">Delete account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer id="site-footer"></footer>
+<script type="module" src="/js/pages/profile.js"></script>
+</body>
+</html>
