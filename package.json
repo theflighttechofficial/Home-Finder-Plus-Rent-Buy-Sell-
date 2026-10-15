@@ -1,5 +1,21 @@
 {
+  "name": "home-finder-plus",
+  "version": "1.0.0",
+  "description": "HomeFinder+ real estate web app (Node.js, Express, MongoDB)",
+  "main": "home_finder/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node home_finder/server.js",
+    "dev": "node --watch home_finder/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "mongoose": "^9.11.2"
   }
 }

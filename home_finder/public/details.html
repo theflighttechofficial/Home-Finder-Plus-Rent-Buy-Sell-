@@ -1305,7 +1305,8 @@ function closeLightbox(){
 
 // FAVORITES
 function toggleFavorite(id){
-    let fav=JSON.parse(localStorage.getItem("favorites")||"[]");
+    id=Number(id);
+    let fav=JSON.parse(localStorage.getItem("favourites")||"[]");
 
     if(fav.includes(id)){
         fav=fav.filter(x=>x!==id);
@@ -1313,18 +1314,18 @@ function toggleFavorite(id){
         fav.push(id);
     }
 
-    localStorage.setItem("favorites",JSON.stringify(fav));
+    localStorage.setItem("favourites",JSON.stringify(fav));
     updateFavoriteIcon(id);
 }
 
 function updateFavoriteIcon(id){
     const icon=document.getElementById("favIcon");
-    let fav=JSON.parse(localStorage.getItem("favorites")||"[]");
-    icon.classList.toggle("active",fav.includes(id));
+    let fav=JSON.parse(localStorage.getItem("favourites")||"[]");
+    icon.classList.toggle("active",fav.includes(Number(id)));
 }
 
 // SHARE
-function share(home){
+function share(){
     const url=window.location.href;
     navigator.clipboard.writeText(url);
     alert("Link copied: " + url);
@@ -1387,7 +1388,7 @@ function loadHomeDetails(){
             </iframe>
 
             <div class="share-row">
-                <button class="btn" onclick='share(${JSON.stringify(home)})'>🔗 Share</button>
+                <button class="btn" onclick="share()">🔗 Share</button>
                 <button class="btn" onclick="window.open('https://wa.me/?text=${encodeURIComponent(window.location.href)}')">💬 WhatsApp</button>
             </div>
         </div>

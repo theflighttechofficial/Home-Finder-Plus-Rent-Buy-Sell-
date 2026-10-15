@@ -36,11 +36,13 @@ HomeFinder+ is a full-stack real estate web application designed to provide a se
 
 ## 📦 Installation
 
+Prerequisites: Node.js 20+ and a running MongoDB server.
+
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/HomeFinderPlus.git
-cd HomeFinderPlus
+git clone https://github.com/theflighttechofficial/Home-Finder-Plus-Rent-Buy-Sell-.git
+cd Home-Finder-Plus-Rent-Buy-Sell-
 ```
 
 Install dependencies:
@@ -49,12 +51,19 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file and configure the required environment variables (MongoDB connection string, JWT secret, etc.).
+Start MongoDB. If you don't have it installed locally, Docker works:
+
+```bash
+docker run -d --name homefinder-mongo -p 27017:27017 mongo:7
+```
+
+Optionally copy `.env.example` to `.env` and adjust `PORT` / `MONGODB_URI`
+(defaults: `3000` and `mongodb://127.0.0.1:27017/userDB`).
 
 Start the server:
 
 ```bash
-node server.js
+npm start        # or: npm run dev (restarts on file changes)
 ```
 
 The application will be available at:
@@ -66,17 +75,16 @@ http://localhost:3000
 ## 📁 Project Structure
 
 ```text
-HomeFinder+
-│── server.js
+Home-Finder-Plus-Rent-Buy-Sell-
 │── package.json
-│── package-lock.json
-│── .env
-│── routes/
-│── models/
-│── controllers/
-│── middleware/
-│── public/
-│── uploads/
+│── .env.example
+│── home_finder/
+│   │── server.js          # Express server + register/login API
+│   └── public/            # Static frontend pages
+│       │── login.html     # Landing page (served at /)
+│       │── index.html     # Property listings
+│       │── assets/homes.js  # Shared listing data
+│       └── ...
 └── README.md
 ```
 
