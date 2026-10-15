@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>List a property — HomeFinder+</title>
+    <meta name="description" content="List your home for rent or sale on HomeFinder+.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<main class="page">
+    <div class="container container-md">
+        <div class="page-head">
+            <div>
+                <h1 id="form-title">List your property</h1>
+                <p id="form-sub">It's free and takes about five minutes. Your progress is saved automatically.</p>
+            </div>
+            <a class="btn btn-ghost" href="/mylistings.html"><i data-icon="arrowLeft"></i> My listings</a>
+        </div>
+
+        <div class="form-layout">
+            <nav class="form-steps" aria-label="Form sections">
+                <a href="#s-basics"><span class="num">1</span> Basics</a>
+                <a href="#s-details"><span class="num">2</span> Details</a>
+                <a href="#s-location"><span class="num">3</span> Location</a>
+                <a href="#s-photos"><span class="num">4</span> Photos</a>
+                <a href="#s-amenities"><span class="num">5</span> Amenities</a>
+                <a href="#s-contact"><span class="num">6</span> Contact</a>
+            </nav>
+
+            <form id="listing-form" novalidate>
+                <div class="stack">
+                    <section class="card card-pad form-section" id="s-basics">
+                        <div class="card-head"><h2>Basics</h2></div>
+                        <div class="form-grid">
+                            <div class="field span-2">
+                                <span class="label">I want to</span>
+                                <div class="segmented" role="radiogroup" aria-label="Purpose">
+                                    <input type="radio" name="purpose" id="pp-rent" value="rent" checked><label for="pp-rent"><i data-icon="key"></i> Rent it out</label>
+                                    <input type="radio" name="purpose" id="pp-sale" value="sale"><label for="pp-sale"><i data-icon="tag"></i> Sell it</label>
+                                </div>
+                            </div>
+                            <div class="field span-2">
+                                <label for="title">Listing title</label>
+                                <input class="input" id="title" name="title" maxlength="120" placeholder="e.g. Sunny 2 BHK with balcony near metro" required>
+                            </div>
+                            <div class="field">
+                                <label for="propertyType">Property type</label>
+                                <select class="select" id="propertyType" name="propertyType" required><option value="">Select…</option></select>
+                            </div>
+                            <div class="field">
+                                <label for="price" id="price-label">Monthly rent (₹)</label>
+                                <input class="input" id="price" name="price" type="number" min="1" step="1" inputmode="numeric" required>
+                                <span class="hint" id="price-hint"></span>
+                            </div>
+                            <div class="field">
+                                <label for="tag">Highlight tag <span class="muted">(optional)</span></label>
+                                <input class="input" id="tag" name="tag" maxlength="40" placeholder="e.g. Sea view, Newly renovated">
+                            </div>
+                            <div class="field" id="status-field" hidden>
+                                <label for="status">Status</label>
+                                <select class="select" id="status" name="status">
+                                    <option value="active">Active</option>
+                                    <option value="rented">Rented out</option>
+                                    <option value="sold">Sold</option>
+                                    <option value="inactive">Hidden</option>
+                                </select>
+                            </div>
+                            <div class="field span-2">
+                                <label for="description">Description</label>
+                                <textarea class="textarea" id="description" name="description" maxlength="5000" rows="6" placeholder="What makes this home special? Mention the layout, light, neighbourhood and anything a visitor should know."></textarea>
+                                <span class="hint"><span id="desc-count">0</span> / 5000</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card card-pad form-section" id="s-details">
+                        <div class="card-head"><h2>Details</h2></div>
+                        <div class="form-grid">
+                            <div class="field"><label for="bedrooms">Bedrooms (BHK)</label><input class="input" id="bedrooms" name="bedrooms" type="number" min="0" max="20" value="2" required></div>
+                            <div class="field"><label for="bathrooms">Bathrooms</label><input class="input" id="bathrooms" name="bathrooms" type="number" min="0" max="20" value="2" required></div>
+                            <div class="field"><label for="builtArea">Built-up area (ft²)</label><input class="input" id="builtArea" name="builtArea" type="number" min="0"></div>
+                            <div class="field"><label for="carpetArea">Carpet area (ft²)</label><input class="input" id="carpetArea" name="carpetArea" type="number" min="0"></div>
+                            <div class="field"><label for="floor">Floor</label><input class="input" id="floor" name="floor" maxlength="20" placeholder="e.g. 4 or Ground"></div>
+                            <div class="field"><label for="totalFloors">Total floors</label><input class="input" id="totalFloors" name="totalFloors" type="number" min="0"></div>
+                            <div class="field"><label for="furnishing">Furnishing</label><select class="select" id="furnishing" name="furnishing"><option value="">Select…</option></select></div>
+                            <div class="field"><label for="facing">Facing</label><select class="select" id="facing" name="facing"><option value="">Select…</option></select></div>
+                            <div class="field span-2"><label class="check"><input type="checkbox" name="parking" id="parking"> Parking available</label></div>
+                        </div>
+                    </section>
+
+                    <section class="card card-pad form-section" id="s-location">
+                        <div class="card-head"><h2>Location</h2></div>
+                        <div class="form-grid">
+                            <div class="field span-2"><label for="line">Address</label><input class="input" id="line" name="address.line" maxlength="200" placeholder="Building, street"></div>
+                            <div class="field"><label for="locality">Locality / area</label><input class="input" id="locality" name="address.locality" maxlength="120" placeholder="e.g. Indiranagar"></div>
+                            <div class="field"><label for="city">City</label><input class="input" id="city" name="address.city" maxlength="60" list="city-list" required><datalist id="city-list"></datalist></div>
+                            <div class="field"><label for="state">State</label><input class="input" id="state" name="address.state" maxlength="60"></div>
+                            <div class="field"><label for="pincode">PIN code</label><input class="input" id="pincode" name="address.pincode" maxlength="10" inputmode="numeric"></div>
+                            <div class="field span-2">
+                                <div class="row row-wrap">
+                                    <span class="label">Pin it on the map</span>
+                                    <span class="spacer"></span>
+                                    <button class="btn btn-sm" type="button" id="use-location"><i data-icon="locate"></i> Use my location</button>
+                                    <button class="btn btn-sm btn-ghost" type="button" id="clear-pin">Clear pin</button>
+                                </div>
+                                <div class="map" id="map"></div>
+                                <span class="hint" id="coords">Click the map to drop a pin. Optional, but listings with a location get more views.</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card card-pad form-section" id="s-photos">
+                        <div class="card-head"><h2>Photos</h2><span class="muted small">Up to 12 · JPG, PNG, WebP · 5 MB each</span></div>
+                        <label class="dropzone" id="dropzone" for="photo-input">
+                            <i data-icon="upload"></i>
+                            <strong>Drag photos here or click to browse</strong>
+                            <span class="small">The first photo is the cover — use ★ to change it.</span>
+                        </label>
+                        <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+                        <div class="thumbs-grid" id="thumbs"></div>
+                        <div class="field mt-2" data-field="images"><input type="hidden" name="images"></div>
+                    </section>
+
+                    <section class="card card-pad form-section" id="s-amenities">
+                        <div class="card-head"><h2>Amenities & nearby</h2></div>
+                        <div class="field">
+                            <span class="label">Amenities</span>
+                            <div class="amenity-picker" id="amenities"></div>
+                            <div class="row mt-1">
+                                <input class="input" id="custom-amenity" maxlength="40" placeholder="Add another amenity">
+                                <button class="btn" type="button" id="add-amenity"><i data-icon="plus"></i> Add</button>
+                            </div>
+                        </div>
+                        <div class="field mt-2">
+                            <label for="nearby">Nearby places <span class="muted">(one per line)</span></label>
+                            <textarea class="textarea" id="nearby" name="nearby" rows="4" placeholder="Metro station – 500 m&#10;City hospital – 1.2 km"></textarea>
+                        </div>
+                    </section>
+
+                    <section class="card card-pad form-section" id="s-contact">
+                        <div class="card-head"><h2>Contact</h2></div>
+                        <div class="form-grid">
+                            <div class="field"><label for="contact-name">Contact name</label><input class="input" id="contact-name" name="contact.name" maxlength="80"></div>
+                            <div class="field"><label for="contact-phone">Phone</label><input class="input" id="contact-phone" name="contact.phone" maxlength="20" inputmode="tel"></div>
+                        </div>
+                        <p class="hint mt-1 mb-0">Your phone is only shown to logged-in users who choose to reveal it. Everyone can message you in-app.</p>
+                    </section>
+                </div>
+
+                <div class="sticky-actions">
+                    <span class="muted small" id="draft-status"></span>
+                    <span class="spacer"></span>
+                    <button class="btn btn-ghost" type="button" id="discard">Discard draft</button>
+                    <button class="btn btn-gradient btn-lg" type="submit" id="submit"><i data-icon="check"></i> Publish listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer id="site-footer"></footer>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script type="module" src="/js/pages/add.js"></script>
+</body>
+</html>

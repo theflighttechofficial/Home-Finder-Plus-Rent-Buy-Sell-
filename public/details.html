@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home details — HomeFinder+</title>
+    <meta name="description" content="Photos, price, amenities and location for this home.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<main class="page">
+    <div class="container" id="details">
+        <div class="skeleton" style="height:428px;border-radius:26px"></div>
+        <div class="details-layout">
+            <div class="stack"><div class="skeleton" style="height:36px;width:60%"></div><div class="skeleton" style="height:18px;width:35%"></div><div class="skeleton" style="height:160px"></div></div>
+            <div class="skeleton" style="height:260px;border-radius:18px"></div>
+        </div>
+    </div>
+
+    <section class="container section" id="similar-section" hidden>
+        <div class="section-head"><div><span class="eyebrow">You may also like</span><h2>Similar homes</h2></div></div>
+        <div class="grid" id="similar"></div>
+    </section>
+</main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="icon-btn close" data-lb="close" aria-label="Close"><i data-icon="x"></i></button>
+    <button class="icon-btn prev" data-lb="prev" aria-label="Previous photo"><i data-icon="chevronLeft"></i></button>
+    <img alt="">
+    <button class="icon-btn next" data-lb="next" aria-label="Next photo"><i data-icon="chevronRight"></i></button>
+    <span class="counter"></span>
+</div>
+
+<footer id="site-footer"></footer>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script type="module" src="/js/pages/details.js"></script>
+</body>
+</html>

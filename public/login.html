@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log in — HomeFinder+</title>
+    <meta name="description" content="Log in to HomeFinder+.">
+    <meta name="theme-color" content="#5b4cf0">
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+</head>
+<body>
+<main class="auth">
+    <aside class="auth-art">
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1400&q=80&auto=format&fit=crop" alt="">
+        <a href="/" class="logo"><span class="logo-mark"><i data-icon="home"></i></span><span>HomeFinder<b>+</b></span></a>
+        <div>
+            <h2>Welcome back.</h2>
+            <p>Pick up where you left off — your saved homes, chats and listings are waiting.</p>
+        </div>
+        <blockquote>“Found a 2 BHK in Indiranagar in four days and spoke directly to the owner. No brokers, no runaround.”<br><strong class="small">— Priya, Bangalore</strong></blockquote>
+    </aside>
+    <section class="auth-form">
+        <button class="icon-btn theme-corner" data-action="theme" aria-label="Toggle dark mode" data-theme-icon><i data-icon="moon"></i></button>
+        <div class="inner">
+            <a href="/" class="logo mobile-logo"><span class="logo-mark"><i data-icon="home"></i></span><span>HomeFinder<b>+</b></span></a>
+            <h1>Log in</h1>
+            <p class="muted">New here? <a href="/register.html" id="register-link">Create a free account</a></p>
+            <div id="alert" class="mb-2"></div>
+            <form id="login-form" class="stack" novalidate>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <div class="input-group"><i data-icon="mail"></i><input class="input" id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i data-icon="lock"></i>
+                        <input class="input" id="password" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
+                        <button class="btn btn-ghost btn-icon btn-sm input-addon" type="button" data-toggle-password aria-label="Show password"><i data-icon="eye"></i></button>
+                    </div>
+                </div>
+                <button class="btn btn-gradient btn-lg btn-block" type="submit">Log in</button>
+            </form>
+            <div class="demo-box">
+                <strong>Just exploring?</strong> Try the demo account.
+                <button class="btn btn-sm btn-soft btn-block" id="demo">Use demo login</button>
+            </div>
+        </div>
+    </section>
+</main>
+<script type="module" src="/js/pages/auth.js"></script>
+</body>
+</html>
