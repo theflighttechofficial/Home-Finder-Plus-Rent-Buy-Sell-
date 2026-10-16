@@ -12,7 +12,8 @@ const ROWS = [
     ["Bedrooms", (l) => `${l.bedrooms} BHK`, (l) => l.bedrooms],
     ["Bathrooms", (l) => l.bathrooms, (l) => l.bathrooms],
     ["Built-up area", (l) => (l.builtArea ? `${formatNumber(l.builtArea)} ft²` : "—"), (l) => l.builtArea || 0],
-    ["Price / ft²", (l) => (l.builtArea ? `₹${formatNumber(Math.round(l.price / l.builtArea))}` : "—"), (l) => (l.builtArea ? -l.price / l.builtArea : -Infinity)],
+    // Only meaningful for homes for sale; a monthly rent per ft² is not a useful number
+    ["Price / ft²", (l) => (l.purpose === "sale" && l.builtArea ? `₹${formatNumber(Math.round(l.price / l.builtArea))}` : "—"), (l) => (l.purpose === "sale" && l.builtArea ? -l.price / l.builtArea : -Infinity)],
     ["Furnishing", (l) => esc(l.furnishing || "—")],
     ["Facing", (l) => esc(l.facing || "—")],
     ["Floor", (l) => esc(l.floor ? `${l.floor}${l.totalFloors ? ` of ${l.totalFloors}` : ""}` : "—")],
@@ -57,7 +58,7 @@ async function render() {
                     )
                     .join("")}</tr></thead>
                 <tbody>
-                    ${ROWS.map(([label, fmt, score]) => {
+                    ${ROWS.filter(([, fmt]) => items.some((l) => fmt(l) !== "—")).map(([label, fmt, score]) => {
                         let best = null;
                         if (score && items.length > 1 && (comparable || label !== "Price" && label !== "Price / ft²")) {
                             const scores = items.map(score);
