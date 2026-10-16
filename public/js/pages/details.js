@@ -37,7 +37,7 @@ function gallery(images) {
                 .map(
                     (src, i) => `<button data-photo="${i}" aria-label="Open photo ${i + 1}">
                         <img src="${esc(src)}" alt="${esc(listing.title)} photo ${i + 1}" ${i ? 'loading="lazy"' : ""}>
-                        ${i === shown.length - 1 && extra > 0 ? `<span class="more">+${extra} photos</span>` : ""}
+                        ${i === shown.length - 1 && extra > 0 ? `<span class="more">+${extra} ${extra === 1 ? "photo" : "photos"}</span>` : ""}
                     </button>`
                 )
                 .join("")}
@@ -67,7 +67,7 @@ function render() {
            </div>`
         : `<div class="card card-pad owner-card">
                 <div class="row mb-2">
-                    ${avatar(l.owner || { name: l.contact?.name })}
+                    ${avatar({ name: l.contact?.name || l.owner?.name, avatar: l.owner?.avatar })}
                     <div>
                         <strong>${esc(l.contact?.name || l.owner?.name || "Owner")}</strong>
                         <div class="small muted">${l.contact?.verified ? `<span class="badge badge-success">${icon("shield")} Verified owner</span>` : "Property owner"}</div>

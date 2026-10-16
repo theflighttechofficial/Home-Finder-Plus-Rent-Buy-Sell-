@@ -719,3 +719,5 @@ body.has-compare-tray main { padding-bottom: 72px; }
 .hero-visual .float small { display: block; font-weight: 500; color: var(--text-3); font-size: 0.75rem; }
 @keyframes bob { 50% { transform: translateY(-8px); } }
 @media (max-width: 1100px) { .hero-grid { grid-template-columns: 1fr; } .hero-visual { display: none; } }
+.compare-table { table-layout: fixed; }
+.compare-table thead th { background: transparent; }
