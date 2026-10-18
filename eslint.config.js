@@ -18,7 +18,7 @@ module.exports = [
     },
     {
         rules: {
-            "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none" }],
+            "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrors: "none" }],
             eqeqeq: ["error", "smart"],
             "prefer-const": "error",
         },

@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config");
-const User = require("../models/User");
+const { db } = require("../db");
 const { unauthorized } = require("../lib/errors");
 
 const cookieOptions = {
@@ -26,7 +26,7 @@ async function loadUser(req, res, next) {
 
     try {
         const { sub } = jwt.verify(token, config.jwtSecret);
-        const user = await User.findById(sub);
+        const user = db.users.get(sub);
         if (user) req.user = user;
         else signOut(res);
     } catch {

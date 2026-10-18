@@ -1,23 +1,27 @@
 process.env.NODE_ENV = "test";
 process.env.UPLOAD_DIR = require("path").join(require("os").tmpdir(), "homefinder-test-uploads");
 
-const mongoose = require("mongoose");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const request = require("supertest");
 const { createApp } = require("../server/app");
 const { seedIfEmpty } = require("../server/seed");
+const { db } = require("../server/db");
 
-const TEST_URI = process.env.TEST_MONGODB_URI || "mongodb://127.0.0.1:27017/homefinder_test";
+let tmpDir;
 
+// Each test file gets a fresh database in a temp file, so saving to disk is exercised too
 async function setup() {
-    await mongoose.connect(TEST_URI, { serverSelectionTimeoutMS: 5000 });
-    await mongoose.connection.dropDatabase();
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "homefinder-test-"));
+    db.open(path.join(tmpDir, "db.json"));
     await seedIfEmpty({ log: () => {} });
     return createApp();
 }
 
 async function teardown() {
-    await mongoose.connection.dropDatabase();
-    await mongoose.disconnect();
+    db.close();
+    fs.rmSync(tmpDir, { recursive: true, force: true });
 }
 
 // Returns a supertest agent that keeps the session cookie
@@ -38,4 +42,4 @@ async function register(app, data = {}) {
 // 1x1 PNG
 const PNG = Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8cfc0f01f0005000201a5b2f2d70000000049454e44ae426082", "hex");
 
-module.exports = { setup, teardown, loginAs, register, request, PNG };
+module.exports = { db, setup, teardown, loginAs, register, request, PNG };

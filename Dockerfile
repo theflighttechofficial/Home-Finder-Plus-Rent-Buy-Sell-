@@ -9,7 +9,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY server ./server
 COPY public ./public
 
-RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
+RUN mkdir -p /app/uploads /app/data && chown -R node:node /app/uploads /app/data
 USER node
 
 EXPOSE 3000
