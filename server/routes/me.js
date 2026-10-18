@@ -1,9 +1,8 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const { z } = require("zod");
-const User = require("../models/User");
-const Listing = require("../models/Listing");
-const Notification = require("../models/Notification");
+const { db } = require("../db");
+const { hashPassword, checkPassword, publicUser } = require("../models/User");
+const { notify } = require("../models/Notification");
 const { parse } = require("../lib/validate");
 const { notFound, badRequest } = require("../lib/errors");
 const { requireAuth, signOut } = require("../middleware/auth");
@@ -12,9 +11,9 @@ const { imageUpload, verifyImages, publicUrl } = require("../middleware/upload")
 const router = express.Router();
 
 // GET /api/me — returns null user for guests so pages can render without a 401
-router.get("/", async (req, res) => {
+router.get("/", (req, res) => {
     if (!req.user) return res.json({ user: null });
-    res.json({ user: req.user, favourites: req.user.favourites.map(String) });
+    res.json({ user: publicUser(req.user), favourites: req.user.favourites || [] });
 });
 
 router.use(requireAuth);
@@ -31,18 +30,14 @@ const profileSchema = z.object({
     bio: z.string().trim().max(400).optional(),
 });
 
-router.patch("/", async (req, res) => {
+router.patch("/", (req, res) => {
     const data = parse(profileSchema, req.body);
-    req.user.set(data);
-    await req.user.save();
-    res.json({ user: req.user });
+    res.json({ user: publicUser(db.users.update(req.user.id, data)) });
 });
 
-router.post("/avatar", imageUpload.single("avatar"), verifyImages, async (req, res) => {
+router.post("/avatar", imageUpload.single("avatar"), verifyImages, (req, res) => {
     if (!req.file) throw badRequest("Choose an image to upload");
-    req.user.avatar = publicUrl(req.file);
-    await req.user.save();
-    res.json({ user: req.user });
+    res.json({ user: publicUser(db.users.update(req.user.id, { avatar: publicUrl(req.file) })) });
 });
 
 const passwordSchema = z.object({
@@ -52,51 +47,46 @@ const passwordSchema = z.object({
 
 router.post("/password", async (req, res) => {
     const data = parse(passwordSchema, req.body);
-    const user = await User.findById(req.user._id).select("+password");
-    if (!(await user.checkPassword(data.currentPassword))) {
+    if (!(await checkPassword(req.user, data.currentPassword))) {
         throw badRequest("Current password is incorrect", { currentPassword: "Current password is incorrect" });
     }
-    await user.setPassword(data.newPassword);
-    await user.save();
+    db.users.update(req.user.id, { password: await hashPassword(data.newPassword) });
     res.json({ success: true, message: "Password updated" });
 });
 
 router.delete("/", async (req, res) => {
     const { password } = parse(z.object({ password: z.string().min(1, "Enter your password") }), req.body);
-    const user = await User.findById(req.user._id).select("+password");
-    if (!(await user.checkPassword(password))) throw badRequest("Password is incorrect", { password: "Password is incorrect" });
+    if (!(await checkPassword(req.user, password))) throw badRequest("Password is incorrect", { password: "Password is incorrect" });
 
-    const listings = await Listing.find({ owner: user._id }).distinct("_id");
-    await Promise.all([
-        Listing.deleteMany({ owner: user._id }),
-        User.updateMany({ favourites: { $in: listings } }, { $pull: { favourites: { $in: listings } } }),
-        Notification.deleteMany({ user: user._id }),
-    ]);
-    await user.deleteOne();
+    const me = req.user.id;
+    const mine = new Set(db.listings.find((l) => l.owner === me).map((l) => l.id));
+    db.listings.removeWhere((l) => l.owner === me);
+    for (const u of db.users.find((u) => u.favourites?.some((id) => mine.has(id)))) {
+        db.users.update(u.id, { favourites: u.favourites.filter((id) => !mine.has(id)) }, { touch: false });
+    }
+    db.notifications.removeWhere((n) => n.user === me);
+    db.users.remove(me);
     signOut(res);
     res.json({ success: true });
 });
 
 // Favourites
-router.get("/favourites", async (req, res) => {
-    const listings = await Listing.find({ _id: { $in: req.user.favourites } });
-    const order = new Map(req.user.favourites.map((id, i) => [String(id), i]));
-    listings.sort((a, b) => order.get(b.id) - order.get(a.id)); // most recently saved first
-    res.json({ items: listings.map((l) => ({ ...l.toJSON(), isFavourite: true })) });
+router.get("/favourites", (req, res) => {
+    // most recently saved first
+    const items = [...(req.user.favourites || [])].reverse().map((id) => db.listings.get(id)).filter(Boolean);
+    res.json({ items: items.map((l) => ({ ...l, isFavourite: true })) });
 });
 
-router.put("/favourites/:listingId", async (req, res) => {
-    const { listingId } = req.params;
-    if (!mongoose.isValidObjectId(listingId)) throw notFound();
-    const listing = await Listing.findById(listingId);
+router.put("/favourites/:listingId", (req, res) => {
+    const listing = db.listings.get(req.params.listingId);
     if (!listing) throw notFound("Listing not found");
 
-    // timestamps off so modifiedCount reflects whether the favourite was actually new
-    const result = await User.updateOne({ _id: req.user._id }, { $addToSet: { favourites: listing._id } }, { timestamps: false });
-    if (result.modifiedCount) {
-        await Listing.updateOne({ _id: listing._id }, { $inc: { favouritesCount: 1 } });
-        if (!listing.owner.equals(req.user._id)) {
-            await Notification.notify(listing.owner, {
+    const favourites = req.user.favourites || [];
+    if (!favourites.includes(listing.id)) {
+        db.users.update(req.user.id, { favourites: [...favourites, listing.id] }, { touch: false });
+        db.listings.update(listing.id, { favouritesCount: (listing.favouritesCount || 0) + 1 }, { touch: false });
+        if (listing.owner !== req.user.id) {
+            notify(listing.owner, {
                 type: "favourite",
                 title: `${req.user.name} saved your listing`,
                 body: listing.title,
@@ -107,20 +97,20 @@ router.put("/favourites/:listingId", async (req, res) => {
     res.json({ success: true, isFavourite: true });
 });
 
-router.delete("/favourites/:listingId", async (req, res) => {
+router.delete("/favourites/:listingId", (req, res) => {
     const { listingId } = req.params;
-    if (!mongoose.isValidObjectId(listingId)) throw notFound();
-
-    const result = await User.updateOne({ _id: req.user._id }, { $pull: { favourites: listingId } }, { timestamps: false });
-    if (result.modifiedCount) {
-        await Listing.updateOne({ _id: listingId, favouritesCount: { $gt: 0 } }, { $inc: { favouritesCount: -1 } });
+    const favourites = req.user.favourites || [];
+    if (favourites.includes(listingId)) {
+        db.users.update(req.user.id, { favourites: favourites.filter((id) => id !== listingId) }, { touch: false });
+        const listing = db.listings.get(listingId);
+        if (listing?.favouritesCount > 0) db.listings.update(listingId, { favouritesCount: listing.favouritesCount - 1 }, { touch: false });
     }
     res.json({ success: true, isFavourite: false });
 });
 
-// Listings owned by the current user (all statuses)
-router.get("/listings", async (req, res) => {
-    const items = await Listing.find({ owner: req.user._id }).sort({ createdAt: -1 });
+// Listings owned by the current user (all statuses), newest first
+router.get("/listings", (req, res) => {
+    const items = db.listings.find((l) => l.owner === req.user.id).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1));
     res.json({ items });
 });
 

@@ -16,7 +16,8 @@ module.exports = {
     isProd,
     isTest: env === "test",
     port: Number(process.env.PORT) || 3000,
-    mongoUri: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/userDB",
+    // JSON file that holds all app data (":memory:" keeps it in memory only)
+    dataFile: process.env.DATA_FILE || path.join(__dirname, "..", "data", "homefinder.json"),
     jwtSecret,
     usingDevSecret: jwtSecret === DEV_SECRET,
     jwtExpiresIn: "7d",

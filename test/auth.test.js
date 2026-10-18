@@ -1,7 +1,6 @@
 const { describe, it, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const mongoose = require("mongoose");
-const { setup, teardown, register, request } = require("./helpers");
+const { db, setup, teardown, register, request } = require("./helpers");
 
 describe("auth", () => {
     let app;
@@ -22,7 +21,7 @@ describe("auth", () => {
 
     it("stores passwords hashed", async () => {
         const { body } = await register(app);
-        const raw = await mongoose.connection.collection("users").findOne({ email: body.email });
+        const raw = db.users.findOne((u) => u.email === body.email);
         assert.match(raw.password, /^\$2[aby]\$/);
     });
 
@@ -47,10 +46,10 @@ describe("auth", () => {
     });
 
     it("upgrades legacy plain-text passwords on login", async () => {
-        await mongoose.connection.collection("users").insertOne({ name: "Legacy", email: "legacy@example.com", password: "oldpass1" });
+        db.users.insert({ name: "Legacy", email: "legacy@example.com", password: "oldpass1" });
         const res = await request(app).post("/api/auth/login").send({ email: "legacy@example.com", password: "oldpass1" });
         assert.equal(res.status, 200);
-        const raw = await mongoose.connection.collection("users").findOne({ email: "legacy@example.com" });
+        const raw = db.users.findOne((u) => u.email === "legacy@example.com");
         assert.match(raw.password, /^\$2/);
     });
 
@@ -70,5 +69,20 @@ describe("auth", () => {
         await request(app).get("/api/me/favourites").expect(401);
         await request(app).get("/api/conversations").expect(401);
         await request(app).post("/api/listings").send({}).expect(401);
+    });
+});
+
+describe("data file", () => {
+    let app;
+    before(async () => (app = await setup()));
+    after(teardown);
+
+    it("persists to disk and reloads", async () => {
+        const { body } = await register(app, { name: "Persist Me" });
+        db.close(); // flush
+        const file = db.file;
+        db.open(file);
+        assert.equal(db.users.findOne((u) => u.email === body.email).name, "Persist Me");
+        assert.equal(db.listings.count(), 28);
     });
 });

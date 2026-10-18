@@ -1,22 +1,24 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const { z } = require("zod");
-const Listing = require("../models/Listing");
-const User = require("../models/User");
+const { db } = require("../db");
+const { userSummary } = require("../models/User");
 const { PURPOSES, PROPERTY_TYPES, FURNISHING, FACING, LISTING_STATUS } = require("../lib/constants");
-const { parse, escapeRegex } = require("../lib/validate");
+const { parse } = require("../lib/validate");
 const { notFound, forbidden, badRequest } = require("../lib/errors");
 const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
+// Comparators: each returns <0 when a should come first
+const byNewest = (a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0);
+const desc = (field) => (a, b) => (b[field] ?? -Infinity) - (a[field] ?? -Infinity) || byNewest(a, b);
 const SORTS = {
-    newest: { createdAt: -1 },
-    price_asc: { price: 1, createdAt: -1 },
-    price_desc: { price: -1, createdAt: -1 },
-    rating: { rating: -1, createdAt: -1 },
-    popular: { views: -1, createdAt: -1 },
-    bedrooms: { bedrooms: -1, price: 1 },
+    newest: byNewest,
+    price_asc: (a, b) => a.price - b.price || byNewest(a, b),
+    price_desc: desc("price"),
+    rating: desc("rating"),
+    popular: desc("views"),
+    bedrooms: (a, b) => b.bedrooms - a.bedrooms || a.price - b.price,
 };
 
 const optionalNumber = z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().min(0).optional());
@@ -87,119 +89,92 @@ const listingSchema = z.object({
     status: z.enum(LISTING_STATUS).optional(),
 });
 
-function toDocument(data) {
-    const { coordinates, ...rest } = data;
-    const doc = { ...rest };
-    if (coordinates) doc.location = { type: "Point", coordinates: [coordinates.lng, coordinates.lat] };
-    else if (coordinates === null) doc.location = undefined;
-    return doc;
-}
+const lower = (v) => String(v ?? "").toLowerCase();
 
+// Turns validated search params into a predicate over listings
 function buildFilter(q) {
-    const filter = { status: "active" };
-    if (q.purpose) filter.purpose = q.purpose;
-    if (q.type) filter.propertyType = q.type;
-    if (q.furnishing) filter.furnishing = q.furnishing;
-    if (q.facing) filter.facing = q.facing;
-    if (q.city) filter["address.city"] = new RegExp(`^${escapeRegex(q.city)}$`, "i");
-    if (q.bedrooms != null) filter.bedrooms = { $gte: q.bedrooms };
-    if (q.minRating != null) filter.rating = { $gte: q.minRating };
-    if (q.parking) filter.parking = q.parking === "true";
-    if (q.minPrice != null || q.maxPrice != null) {
-        filter.price = {};
-        if (q.minPrice != null) filter.price.$gte = q.minPrice;
-        if (q.maxPrice != null) filter.price.$lte = q.maxPrice;
-    }
+    const tests = [(l) => l.status === "active"];
+    if (q.purpose) tests.push((l) => l.purpose === q.purpose);
+    if (q.type) tests.push((l) => l.propertyType === q.type);
+    if (q.furnishing) tests.push((l) => l.furnishing === q.furnishing);
+    if (q.facing) tests.push((l) => l.facing === q.facing);
+    if (q.city) tests.push((l) => lower(l.address?.city) === lower(q.city));
+    if (q.minRating != null) tests.push((l) => (l.rating ?? 0) >= q.minRating);
+    if (q.parking) tests.push((l) => Boolean(l.parking) === (q.parking === "true"));
+    if (q.minPrice != null) tests.push((l) => l.price >= q.minPrice);
+    if (q.maxPrice != null) tests.push((l) => l.price <= q.maxPrice);
     if (q.amenities) {
-        const list = q.amenities.split(",").map((a) => a.trim()).filter(Boolean);
-        if (list.length) filter.amenities = { $all: list.map((a) => new RegExp(`^${escapeRegex(a)}$`, "i")) };
+        const wanted = q.amenities.split(",").map((a) => lower(a.trim())).filter(Boolean);
+        if (wanted.length) tests.push((l) => {
+            const have = new Set((l.amenities || []).map(lower));
+            return wanted.every((a) => have.has(a));
+        });
     }
+
+    let exactBedrooms = null;
     if (q.q) {
         // "2 BHK" / "2bhk" in free text becomes an exact bedroom filter
         const text = q.q.replace(/\b(\d+)\s*bhk\b/i, (_m, n) => {
-            filter.bedrooms = Number(n);
+            exactBedrooms = Number(n);
             return " ";
         });
-        const terms = text.split(/\s+/).filter(Boolean).slice(0, 6);
-        if (terms.length) filter.$and = terms.map((term) => {
-            const re = new RegExp(escapeRegex(term), "i");
-            const or = [
-                { title: re },
-                { description: re },
-                { tag: re },
-                { propertyType: re },
-                { "address.city": re },
-                { "address.locality": re },
-                { amenities: re },
-            ];
-            return { $or: or };
+        const terms = text.split(/\s+/).filter(Boolean).slice(0, 6).map(lower);
+        if (terms.length) tests.push((l) => {
+            const haystack = lower([l.title, l.description, l.tag, l.propertyType, l.address?.city, l.address?.locality, ...(l.amenities || [])].join(" \u0000 "));
+            return terms.every((t) => haystack.includes(t));
         });
     }
-    return filter;
+    if (exactBedrooms != null) tests.push((l) => l.bedrooms === exactBedrooms);
+    else if (q.bedrooms != null) tests.push((l) => l.bedrooms >= q.bedrooms);
+
+    return (l) => tests.every((t) => t(l));
 }
 
-const CARD_FIELDS =
-    "title purpose price propertyType tag bedrooms bathrooms builtArea furnishing parking rating address images status views favouritesCount createdAt facing";
+const CARD_FIELDS = ["id", "title", "purpose", "price", "propertyType", "tag", "bedrooms", "bathrooms", "builtArea", "furnishing", "parking", "rating", "address", "images", "status", "views", "favouritesCount", "createdAt", "facing"];
 
-async function favouriteSet(user) {
-    if (!user) return new Set();
-    return new Set(user.favourites.map(String));
-}
-
-function withFavourite(listings, favs) {
-    return listings.map((l) => ({ ...l.toJSON(), isFavourite: favs.has(l.id) }));
-}
+const card = (l) => Object.fromEntries(CARD_FIELDS.filter((k) => l[k] !== undefined).map((k) => [k, l[k]]));
+const favouriteSet = (user) => new Set(user?.favourites || []);
+const withFavourite = (listings, user, shape = (l) => l) => {
+    const favs = favouriteSet(user);
+    return listings.map((l) => ({ ...shape(l), isFavourite: favs.has(l.id) }));
+};
 
 // GET /api/listings — search, filter, sort and paginate
-router.get("/", async (req, res) => {
+router.get("/", (req, res) => {
     const q = parse(searchSchema, req.query);
-    const filter = buildFilter(q);
-
-    const [items, total] = await Promise.all([
-        Listing.find(filter)
-            .select(CARD_FIELDS)
-            .sort(SORTS[q.sort])
-            .skip((q.page - 1) * q.limit)
-            .limit(q.limit),
-        Listing.countDocuments(filter),
-    ]);
+    const matches = db.listings.find(buildFilter(q)).sort(SORTS[q.sort]);
+    const items = matches.slice((q.page - 1) * q.limit, q.page * q.limit);
 
     res.json({
-        items: withFavourite(items, await favouriteSet(req.user)),
-        total,
+        items: withFavourite(items, req.user, card),
+        total: matches.length,
         page: q.page,
-        pages: Math.max(1, Math.ceil(total / q.limit)),
+        pages: Math.max(1, Math.ceil(matches.length / q.limit)),
         limit: q.limit,
     });
 });
 
 // GET /api/listings/meta — values for filter dropdowns and the home page
-router.get("/meta", async (_req, res) => {
-    const [cities, priceStats, amenities, total] = await Promise.all([
-        Listing.aggregate([
-            { $match: { status: "active" } },
-            { $group: { _id: "$address.city", count: { $sum: 1 } } },
-            { $sort: { count: -1, _id: 1 } },
-        ]),
-        Listing.aggregate([
-            { $match: { status: "active" } },
-            { $group: { _id: "$purpose", min: { $min: "$price" }, max: { $max: "$price" }, count: { $sum: 1 } } },
-        ]),
-        Listing.aggregate([
-            { $match: { status: "active" } },
-            { $unwind: "$amenities" },
-            { $group: { _id: "$amenities", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 16 },
-        ]),
-        Listing.countDocuments({ status: "active" }),
-    ]);
+router.get("/meta", (_req, res) => {
+    const active = db.listings.find((l) => l.status === "active");
+    const cities = new Map();
+    const purposes = {};
+    const amenities = new Map();
+    for (const l of active) {
+        const city = l.address?.city;
+        if (city) cities.set(city, (cities.get(city) || 0) + 1);
+        const p = (purposes[l.purpose] ??= { min: l.price, max: l.price, count: 0 });
+        p.min = Math.min(p.min, l.price);
+        p.max = Math.max(p.max, l.price);
+        p.count++;
+        for (const a of l.amenities || []) amenities.set(a, (amenities.get(a) || 0) + 1);
+    }
 
     res.json({
-        total,
-        cities: cities.map((c) => ({ name: c._id, count: c.count })),
-        purposes: Object.fromEntries(priceStats.map((p) => [p._id, { min: p.min, max: p.max, count: p.count }])),
-        amenities: amenities.map((a) => a._id),
+        total: active.length,
+        cities: [...cities].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
+        purposes,
+        amenities: [...amenities].sort((a, b) => b[1] - a[1]).slice(0, 16).map(([name]) => name),
         propertyTypes: PROPERTY_TYPES,
         furnishing: FURNISHING,
         facing: FACING,
@@ -207,93 +182,95 @@ router.get("/meta", async (_req, res) => {
 });
 
 // GET /api/listings/compare?ids=a,b,c
-router.get("/compare", async (req, res) => {
-    const ids = String(req.query.ids || "")
-        .split(",")
-        .filter((id) => mongoose.isValidObjectId(id))
-        .slice(0, 4);
-    const listings = await Listing.find({ _id: { $in: ids } });
-    const order = new Map(ids.map((id, i) => [id, i]));
-    listings.sort((a, b) => order.get(a.id) - order.get(b.id));
-    res.json({ items: withFavourite(listings, await favouriteSet(req.user)) });
+router.get("/compare", (req, res) => {
+    const ids = String(req.query.ids || "").split(",").slice(0, 4);
+    const listings = ids.map((id) => db.listings.get(id)).filter(Boolean);
+    res.json({ items: withFavourite(listings, req.user) });
 });
 
 // GET /api/listings/:id
-router.get("/:id", async (req, res) => {
-    const listing = await Listing.findById(req.params.id).populate("owner", "name avatar createdAt city");
+router.get("/:id", (req, res) => {
+    let listing = db.listings.get(req.params.id);
     if (!listing) throw notFound("This listing doesn't exist or was removed");
 
-    const isOwner = req.user && listing.owner && listing.owner._id.equals(req.user._id);
+    const isOwner = Boolean(req.user && listing.owner === req.user.id);
     if (listing.status === "inactive" && !isOwner) throw notFound("This listing is no longer available");
 
-    if (!isOwner) await Listing.updateOne({ _id: listing._id }, { $inc: { views: 1 } });
+    if (!isOwner) listing = db.listings.update(listing.id, { views: (listing.views || 0) + 1 }, { touch: false });
 
-    const favs = await favouriteSet(req.user);
-    res.json({ ...listing.toJSON(), isFavourite: favs.has(listing.id), isOwner: Boolean(isOwner) });
+    const owner = db.users.get(listing.owner);
+    res.json({
+        ...listing,
+        owner: owner ? { ...userSummary(owner), city: owner.city, createdAt: owner.createdAt } : null,
+        isFavourite: favouriteSet(req.user).has(listing.id),
+        isOwner,
+    });
 });
 
 // GET /api/listings/:id/similar
-router.get("/:id/similar", async (req, res) => {
-    const listing = await Listing.findById(req.params.id);
+router.get("/:id/similar", (req, res) => {
+    const listing = db.listings.get(req.params.id);
     if (!listing) throw notFound();
 
-    const items = await Listing.find({
-        _id: { $ne: listing._id },
-        status: "active",
-        purpose: listing.purpose,
-        $or: [{ "address.city": listing.address.city }, { propertyType: listing.propertyType }],
-    })
-        .select(CARD_FIELDS)
-        .sort({ rating: -1, createdAt: -1 })
-        .limit(4);
+    const items = db.listings
+        .find((l) => l.id !== listing.id && l.status === "active" && l.purpose === listing.purpose &&
+            (l.address?.city === listing.address?.city || l.propertyType === listing.propertyType))
+        .sort(SORTS.rating)
+        .slice(0, 4);
 
-    res.json({ items: withFavourite(items, await favouriteSet(req.user)) });
+    res.json({ items: withFavourite(items, req.user, card) });
 });
 
 // POST /api/listings
-router.post("/", requireAuth, async (req, res) => {
+router.post("/", requireAuth, (req, res) => {
     const data = parse(listingSchema, req.body);
     if (!data.images?.length) throw badRequest("Add at least one photo", { images: "Add at least one photo" });
 
-    const doc = toDocument(data);
-    doc.contact = {
-        name: data.contact?.name || req.user.name,
-        phone: data.contact?.phone || req.user.phone,
-        verified: false,
-    };
-    doc.owner = req.user._id;
-
-    const listing = await Listing.create(doc);
+    const listing = db.listings.insert({
+        description: "",
+        amenities: [],
+        nearby: [],
+        parking: false,
+        ...withoutNull(data),
+        status: data.status || "active",
+        contact: { name: data.contact?.name || req.user.name, phone: data.contact?.phone || req.user.phone, verified: false },
+        owner: req.user.id,
+        views: 0,
+        favouritesCount: 0,
+    });
     res.status(201).json(listing);
 });
 
-async function loadOwned(req) {
-    const listing = await Listing.findById(req.params.id);
+// Fields sent as null are removed (e.g. clearing the map pin)
+const withoutNull = (data) => Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v === null ? undefined : v]));
+
+function loadOwned(req) {
+    const listing = db.listings.get(req.params.id);
     if (!listing) throw notFound();
-    if (!listing.owner.equals(req.user._id) && req.user.role !== "admin") throw forbidden("You can only edit your own listings");
+    if (listing.owner !== req.user.id && req.user.role !== "admin") throw forbidden("You can only edit your own listings");
     return listing;
 }
 
 // PATCH /api/listings/:id — only the fields sent are changed
 const updateSchema = listingSchema.partial();
 
-router.patch("/:id", requireAuth, async (req, res) => {
-    const listing = await loadOwned(req);
+router.patch("/:id", requireAuth, (req, res) => {
+    const listing = loadOwned(req);
     const data = parse(updateSchema, req.body);
     if (data.images && !data.images.length) throw badRequest("Add at least one photo", { images: "Add at least one photo" });
 
-    const doc = toDocument(data);
-    if (data.contact) doc.contact = { ...listing.toObject().contact, ...data.contact };
-    listing.set(doc);
-    await listing.save();
-    res.json(listing);
+    const patch = withoutNull(data);
+    if (data.contact) patch.contact = { ...listing.contact, ...data.contact };
+    res.json(db.listings.update(listing.id, patch));
 });
 
 // DELETE /api/listings/:id
-router.delete("/:id", requireAuth, async (req, res) => {
-    const listing = await loadOwned(req);
-    await listing.deleteOne();
-    await User.updateMany({ favourites: listing._id }, { $pull: { favourites: listing._id } });
+router.delete("/:id", requireAuth, (req, res) => {
+    const listing = loadOwned(req);
+    db.listings.remove(listing.id);
+    for (const u of db.users.find((u) => u.favourites?.includes(listing.id))) {
+        db.users.update(u.id, { favourites: u.favourites.filter((id) => id !== listing.id) }, { touch: false });
+    }
     res.json({ success: true });
 });
 

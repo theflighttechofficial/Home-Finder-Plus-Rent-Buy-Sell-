@@ -1,51 +1,49 @@
 const express = require("express");
-const Notification = require("../models/Notification");
-const Conversation = require("../models/Conversation");
+const { db } = require("../db");
 const { requireAuth } = require("../middleware/auth");
 const { notFound } = require("../lib/errors");
 
 const router = express.Router();
 router.use(requireAuth);
 
-router.get("/", async (req, res) => {
-    const items = await Notification.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100);
+const newestFirst = (a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0);
+
+router.get("/", (req, res) => {
+    const items = db.notifications.find((n) => n.user === req.user.id).sort(newestFirst).slice(0, 100);
     res.json({ items });
 });
 
 // Badge counts for the header
-router.get("/counts", async (req, res) => {
-    const me = String(req.user._id);
-    const [notifications, conversations] = await Promise.all([
-        Notification.countDocuments({ user: req.user._id, read: false }),
-        Conversation.find({ participants: req.user._id }).select("unread"),
-    ]);
-    const messages = conversations.reduce((n, c) => n + (c.unread.get(me) || 0), 0);
+router.get("/counts", (req, res) => {
+    const me = req.user.id;
+    const notifications = db.notifications.count((n) => n.user === me && !n.read);
+    const messages = db.conversations.find((c) => c.participants.includes(me)).reduce((n, c) => n + (c.unread?.[me] || 0), 0);
     res.json({ notifications, messages });
 });
 
-router.post("/read-all", async (req, res) => {
-    await Notification.updateMany({ user: req.user._id, read: false }, { read: true });
+router.post("/read-all", (req, res) => {
+    for (const n of db.notifications.find((n) => n.user === req.user.id && !n.read)) db.notifications.update(n.id, { read: true });
     res.json({ success: true });
 });
 
-router.patch("/:id", async (req, res) => {
-    const n = await Notification.findOneAndUpdate(
-        { _id: req.params.id, user: req.user._id },
-        { read: req.body?.read !== false },
-        { new: true }
-    );
-    if (!n) throw notFound();
-    res.json(n);
+function loadOwn(req) {
+    const n = db.notifications.get(req.params.id);
+    if (!n || n.user !== req.user.id) throw notFound();
+    return n;
+}
+
+router.patch("/:id", (req, res) => {
+    const n = loadOwn(req);
+    res.json(db.notifications.update(n.id, { read: req.body?.read !== false }));
 });
 
-router.delete("/:id", async (req, res) => {
-    const result = await Notification.deleteOne({ _id: req.params.id, user: req.user._id });
-    if (!result.deletedCount) throw notFound();
+router.delete("/:id", (req, res) => {
+    db.notifications.remove(loadOwn(req).id);
     res.json({ success: true });
 });
 
-router.delete("/", async (req, res) => {
-    await Notification.deleteMany({ user: req.user._id });
+router.delete("/", (req, res) => {
+    db.notifications.removeWhere((n) => n.user === req.user.id);
     res.json({ success: true });
 });
 

@@ -9,7 +9,7 @@
 [![CI](https://github.com/theflighttechofficial/Home-Finder-Plus-Rent-Buy-Sell-/actions/workflows/ci.yml/badge.svg)](https://github.com/theflighttechofficial/Home-Finder-Plus-Rent-Buy-Sell-/actions/workflows/ci.yml)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)
+![No database server](https://img.shields.io/badge/database-built--in-12a150)
 ![No build step](https://img.shields.io/badge/frontend-no%20build%20step-5b4cf0)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
 
@@ -177,20 +177,16 @@ Designed for phones first: a bottom-sheet filter panel, a slide-out menu and a f
 docker compose up --build
 ```
 
-Then open **http://localhost:3000**. MongoDB, the app and the demo data all start together.
+Then open **http://localhost:3000**. The app and its demo data start together.
 
-### Option B: Run locally
+### Option B: Run with Node.js (no database to install)
 
-**Prerequisites:** Node.js 20+ and MongoDB 6+.
+**Prerequisite:** [Node.js 20+](https://nodejs.org). That's it. The app stores its data in a JSON file (`data/homefinder.json`), created on first start.
 
 ```bash
 git clone https://github.com/theflighttechofficial/Home-Finder-Plus-Rent-Buy-Sell-.git
 cd Home-Finder-Plus-Rent-Buy-Sell-
 npm install
-
-# No MongoDB installed? Start one with Docker:
-docker run -d --name homefinder-mongo -p 27017:27017 mongo:7
-
 cp .env.example .env   # optional; the defaults work for local development
 npm run dev            # restarts on file changes; use `npm start` for production
 ```
@@ -214,8 +210,8 @@ On first start, the app seeds **28 listings across 10 cities** and two accounts.
 |---|---|
 | `npm start` | Start the server |
 | `npm run dev` | Start with auto-restart on file changes |
-| `npm run seed` | Seed demo data if the database is empty (`npm run seed -- --reset` starts over) |
-| `npm test` | Run the API test suite (needs MongoDB; uses a separate database) |
+| `npm run seed` | Seed demo data if there are no listings (`npm run seed -- --reset` wipes all data and starts over) |
+| `npm test` | Run the API test suite (uses temporary data files, never your real data) |
 | `npm run lint` | Lint the server and browser code |
 
 ### Configuration
@@ -225,12 +221,11 @@ Set these in a `.env` file (see [`.env.example`](.env.example)):
 | Variable | Default | Notes |
 |---|---|---|
 | `PORT` | `3000` | |
-| `MONGODB_URI` | `mongodb://127.0.0.1:27017/userDB` | |
+| `DATA_FILE` | `./data/homefinder.json` | Where all app data is saved. Back up this file to back up the app. |
 | `JWT_SECRET` | dev-only fallback | **Required in production.** The server won't start without it. |
 | `NODE_ENV` | `development` | `production` turns on secure cookies and static caching |
 | `SEED_ON_START` | `true` | Seed demo data when there are no listings |
 | `UPLOAD_DIR` | `./uploads` | Where uploaded photos are stored |
-| `TEST_MONGODB_URI` | `mongodb://127.0.0.1:27017/homefinder_test` | Used by `npm test`; dropped after each run |
 
 ---
 
@@ -247,9 +242,11 @@ flowchart LR
         MW[Middleware<br/>Helmet CSP · rate limit · same-origin<br/>session loader · Zod validation]
         MW --> API
     end
-    API --> DB[(MongoDB<br/>users · listings · conversations<br/>messages · notifications)]
+    API --> DB[(JSON data file<br/>users · listings · conversations<br/>messages · notifications)]
     API --> FS[[Uploaded photos]]
 ```
+
+**Storage** is a small built-in document store (`server/db.js`): data is kept in memory and saved to `data/homefinder.json` a moment after each change. Writes go to a temp file that then replaces the old one, so a crash can't leave a half-written file. There is no database server to install. This suits a single app instance with thousands of listings; for a large multi-server deployment you'd swap `server/db.js` for a real database.
 
 The frontend has **no build step**. Each page is plain HTML plus one small ES module in `public/js/pages/`. They share one module (`public/js/app.js`) for the header, the API client, toasts, listing cards, favourites and compare. Styling is one design-system stylesheet with light and dark tokens.
 
@@ -261,9 +258,10 @@ The frontend has **no build step**. Each page is plain HTML plus one small ES mo
 │   ├── index.js              # Entry point: connect DB, seed, listen
 │   ├── app.js                # Express app: security, routes, static files
 │   ├── config.js             # Environment config
+│   ├── db.js                 # Built-in JSON-file document store
 │   ├── seed.js               # Demo data (also: npm run seed)
 │   ├── seed/listings.json
-│   ├── models/               # User, Listing, Conversation, Message, Notification
+│   ├── models/               # User and notification helpers
 │   ├── routes/               # auth, me, listings, uploads, conversations, notifications
 │   ├── middleware/           # auth, uploads, security, error handling
 │   └── lib/                  # validation, errors, constants
@@ -357,11 +355,11 @@ Sort options: `newest`, `price_asc`, `price_desc`, `rating`, `popular`, `bedroom
 ## 🧪 Testing
 
 ```bash
-npm test        # 49 API tests: auth, listings, uploads, favourites, messaging, notifications, pages
+npm test        # 50 API tests: auth, listings, uploads, favourites, messaging, notifications, storage, pages
 npm run lint
 ```
 
-Tests run against a real MongoDB using a separate `homefinder_test` database that is dropped afterwards. They cover:
+Each test file runs against its own temporary data file, deleted afterwards. They cover:
 
 - **Auth:** hashing, cookies, legacy password upgrades, cross-site blocking
 - **Listings:** search, filters, pagination, ownership rules, partial updates

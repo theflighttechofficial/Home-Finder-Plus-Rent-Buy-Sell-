@@ -2,8 +2,9 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 const { z } = require("zod");
 const config = require("../config");
-const User = require("../models/User");
-const Notification = require("../models/Notification");
+const { db } = require("../db");
+const { hashPassword, checkPassword, findByEmail, publicUser } = require("../models/User");
+const { notify } = require("../models/Notification");
 const { parse } = require("../lib/validate");
 const { unauthorized, conflict } = require("../lib/errors");
 const { signIn, signOut } = require("../middleware/auth");
@@ -34,13 +35,11 @@ const loginSchema = z.object({
 router.post("/register", authLimiter, async (req, res) => {
     const data = parse(registerSchema, req.body);
 
-    if (await User.exists({ email: data.email })) throw conflict("An account with this email already exists");
+    if (findByEmail(data.email)) throw conflict("An account with this email already exists");
 
-    const user = new User({ name: data.name, email: data.email });
-    await user.setPassword(data.password);
-    await user.save();
+    const user = db.users.insert({ name: data.name, email: data.email, password: await hashPassword(data.password), favourites: [], role: "user" });
 
-    await Notification.notify(user._id, {
+    notify(user.id, {
         type: "system",
         title: `Welcome to HomeFinder+, ${user.name.split(" ")[0]}!`,
         body: "Save homes you love, message owners and list your own property in minutes.",
@@ -48,19 +47,19 @@ router.post("/register", authLimiter, async (req, res) => {
     });
 
     signIn(res, user);
-    res.status(201).json({ success: true, message: "Account created", user });
+    res.status(201).json({ success: true, message: "Account created", user: publicUser(user) });
 });
 
 router.post("/login", authLimiter, async (req, res) => {
     const data = parse(loginSchema, req.body);
 
-    const user = await User.findOne({ email: data.email }).select("+password");
-    if (!user || !(await user.checkPassword(data.password))) {
+    const user = findByEmail(data.email);
+    if (!user || !(await checkPassword(user, data.password))) {
         throw unauthorized("Incorrect email or password");
     }
 
     signIn(res, user);
-    res.json({ success: true, message: "Welcome back!", user });
+    res.json({ success: true, message: "Welcome back!", user: publicUser(user) });
 });
 
 router.post("/logout", (_req, res) => {
