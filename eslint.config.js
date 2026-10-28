@@ -5,7 +5,7 @@ module.exports = [
     { ignores: ["node_modules/", "uploads/", "coverage/"] },
     js.configs.recommended,
     {
-        files: ["server/**/*.js", "test/**/*.js", "*.js"],
+        files: ["server/**/*.js", "api/**/*.js", "test/**/*.js", "*.js"],
         languageOptions: { ecmaVersion: 2023, sourceType: "commonjs", globals: globals.node },
     },
     {

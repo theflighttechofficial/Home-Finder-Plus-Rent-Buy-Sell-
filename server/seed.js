@@ -1,5 +1,3 @@
-const path = require("path");
-const fs = require("fs");
 const { db } = require("./db");
 const { hashPassword, findByEmail } = require("./models/User");
 const { notify } = require("./models/Notification");
@@ -21,7 +19,7 @@ async function seedIfEmpty({ force = false, log = console.log } = {}) {
 
     const owner = await upsertUser(DEMO_USERS[0]);
     const buyer = await upsertUser(DEMO_USERS[1]);
-    const listings = JSON.parse(fs.readFileSync(path.join(__dirname, "seed", "listings.json"), "utf8"));
+    const listings = require("./seed/listings.json");
 
     const now = Date.now();
     listings.forEach(({ location, ...l }, i) => {
