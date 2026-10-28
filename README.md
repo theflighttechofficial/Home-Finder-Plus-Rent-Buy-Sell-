@@ -193,7 +193,17 @@ npm run dev            # restarts on file changes; use `npm start` for productio
 
 Then open **http://localhost:3000**.
 
-### 🔑 Demo accounts
+### Option C: Deploy to Vercel
+
+The repo includes `vercel.json` and a serverless entry point (`api/index.js`).
+
+1. Import the repository in Vercel. Leave the framework preset as **Other** and the build settings empty.
+2. In **Settings → Environment Variables**, add `JWT_SECRET` with a long random string. You can make one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`. The app refuses to start without it.
+3. Redeploy.
+
+> **Data on Vercel is temporary.** Vercel functions can only write to `/tmp`, which is wiped whenever an instance shuts down, and each instance has its own copy. New accounts, listings, messages and uploaded photos will disappear after a while, and the demo data is re-created. That's fine for a demo. For data that lasts, run the app on a host with a persistent disk (Render, Railway, Fly.io or any VPS) using Option A or B.
+
+
 
 On first start, the app seeds **28 listings across 10 cities** and two accounts. Both use the password `Demo@1234`.
 
