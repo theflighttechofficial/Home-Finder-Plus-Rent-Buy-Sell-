@@ -9,10 +9,11 @@ const onVercel = Boolean(process.env.VERCEL);
 const writableRoot = onVercel ? path.join("/tmp", "homefinder") : path.join(__dirname, "..");
 
 const DEV_SECRET = "homefinder-dev-secret-change-me";
-const jwtSecret = process.env.JWT_SECRET || (isProd ? null : DEV_SECRET);
-if (!jwtSecret) {
-    throw new Error("JWT_SECRET must be set in production. Add it as an environment variable (any long random string).");
-}
+// In production without JWT_SECRET, fall back to a random secret for this process instead of
+// refusing to start: browsing keeps working, but logins reset whenever the process restarts
+// (and on Vercel can drop when a request lands on a different instance). Set JWT_SECRET to fix.
+const missingProdSecret = isProd && !process.env.JWT_SECRET;
+const jwtSecret = process.env.JWT_SECRET || (isProd ? require("crypto").randomBytes(48).toString("hex") : DEV_SECRET);
 
 module.exports = {
     env,
@@ -24,6 +25,7 @@ module.exports = {
     dataFile: process.env.DATA_FILE || path.join(writableRoot, "data", "homefinder.json"),
     jwtSecret,
     usingDevSecret: jwtSecret === DEV_SECRET,
+    missingProdSecret,
     jwtExpiresIn: "7d",
     cookieName: "hf_token",
     seedOnStart: process.env.SEED_ON_START !== "false",

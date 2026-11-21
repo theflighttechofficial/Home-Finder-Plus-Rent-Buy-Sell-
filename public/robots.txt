@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://home-finder-plus-rent-buy-sell.vercel.app/sitemap.xml

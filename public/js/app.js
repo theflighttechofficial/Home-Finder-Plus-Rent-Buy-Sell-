@@ -117,7 +117,14 @@ export async function api(path, { method = "GET", body, form } = {}) {
         throw new ApiError("Can't reach the server. Check your connection and try again.", 0);
     }
 
-    const data = await res.json().catch(() => ({}));
+    const text = await res.text().catch(() => "");
+    let data = {};
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch {
+        // Not JSON (e.g. a hosting error page): show its first line rather than a bare status code
+        if (!res.ok && text && !text.trimStart().startsWith("<")) data = { message: text.trim().split("\n")[0].slice(0, 200) };
+    }
     if (!res.ok) {
         if (res.status === 401 && session.user) {
             session.user = null;

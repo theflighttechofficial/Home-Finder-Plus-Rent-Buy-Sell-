@@ -198,7 +198,7 @@ Then open **http://localhost:3000**.
 The repo includes `vercel.json` and a serverless entry point (`api/index.js`).
 
 1. Import the repository in Vercel. Leave the framework preset as **Other** and the build settings empty.
-2. In **Settings → Environment Variables**, add `JWT_SECRET` with a long random string. You can make one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`. The app refuses to start without it.
+2. In **Settings → Environment Variables**, add `JWT_SECRET` with a long random string. You can make one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`. Without it the site still works, but logins don't survive between Vercel instances.
 3. Redeploy.
 
 > **Data on Vercel is temporary.** Vercel functions can only write to `/tmp`, which is wiped whenever an instance shuts down, and each instance has its own copy. New accounts, listings, messages and uploaded photos will disappear after a while, and the demo data is re-created. That's fine for a demo. For data that lasts, run the app on a host with a persistent disk (Render, Railway, Fly.io or any VPS) using Option A or B.
@@ -232,7 +232,7 @@ Set these in a `.env` file (see [`.env.example`](.env.example)):
 |---|---|---|
 | `PORT` | `3000` | |
 | `DATA_FILE` | `./data/homefinder.json` | Where all app data is saved. Back up this file to back up the app. |
-| `JWT_SECRET` | dev-only fallback | **Required in production.** The server won't start without it. |
+| `JWT_SECRET` | dev-only fallback | **Set this in production.** Without it a random secret is used and logins reset whenever the server restarts. |
 | `NODE_ENV` | `development` | `production` turns on secure cookies and static caching |
 | `SEED_ON_START` | `true` | Seed demo data when there are no listings |
 | `UPLOAD_DIR` | `./uploads` | Where uploaded photos are stored |

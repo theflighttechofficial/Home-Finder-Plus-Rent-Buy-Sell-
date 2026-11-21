@@ -14,6 +14,7 @@ async function main() {
     console.log(`Data file: ${config.dataFile}`);
 
     if (config.usingDevSecret) console.warn("Using the development JWT secret. Set JWT_SECRET in .env for real deployments.");
+    if (config.missingProdSecret) console.warn("JWT_SECRET is not set: using a random secret, so logins reset when the server restarts. Set JWT_SECRET to keep users logged in.");
     if (config.seedOnStart) await seedIfEmpty();
 
     const server = createApp().listen(config.port, () => {

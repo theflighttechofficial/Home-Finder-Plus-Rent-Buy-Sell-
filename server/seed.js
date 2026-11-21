@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { db } = require("./db");
 const { hashPassword, findByEmail } = require("./models/User");
 const { notify } = require("./models/Notification");
@@ -25,6 +26,8 @@ async function seedIfEmpty({ force = false, log = console.log } = {}) {
     listings.forEach(({ location, ...l }, i) => {
         const at = new Date(now - i * 9 * 60 * 60 * 1000).toISOString();
         db.listings.insert({
+            // Stable ids, so demo listing URLs (shared links, sitemap) stay the same after re-seeding
+            id: crypto.createHash("sha1").update(`homefinder-listing-${i}`).digest("hex").slice(0, 24),
             ...l,
             coordinates: location ? { lat: location.coordinates[1], lng: location.coordinates[0] } : undefined,
             status: "active",
